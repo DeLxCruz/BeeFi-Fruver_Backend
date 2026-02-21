@@ -8,8 +8,8 @@ public class DeliveryStatusHistory : Entity
     public Guid DeliveryId { get; private set; }
     public DeliveryStatus Status { get; private set; }
     public DateTime Timestamp { get; private set; }
-    public decimal? Latitude { get; private set; }
-    public decimal? Longitude { get; private set; }
+    public double? Latitude { get; private set; }
+    public double? Longitude { get; private set; }
     public string? Notes { get; private set; }
     public Guid? UpdatedBy { get; private set; }
 
@@ -26,8 +26,8 @@ public class DeliveryStatusHistory : Entity
         DeliveryStatus status,
         Guid? updatedBy = null,
         string? notes = null,
-        decimal? latitude = null,
-        decimal? longitude = null)
+        double? latitude = null,
+        double? longitude = null)
     {
         return new DeliveryStatusHistory(Guid.NewGuid())
         {

@@ -58,16 +58,11 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .IsRequired();
 
         builder.HasIndex(o => new { o.UserId, o.CreatedAt });
-        builder.HasIndex(o => new { o.FruverId, o.Status });
         builder.HasIndex(o => o.Status);
 
         builder.HasOne(o => o.User)
             .WithMany(u => u.Orders)
             .HasForeignKey(o => o.UserId);
-
-        builder.HasOne(o => o.Fruver)
-            .WithMany(u => u.FruverOrders)
-            .HasForeignKey(o => o.FruverId);
 
         builder.HasOne(o => o.Address)
             .WithMany(a => a.Orders)

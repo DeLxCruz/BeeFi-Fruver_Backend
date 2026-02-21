@@ -31,11 +31,11 @@ public class User : Entity, IAuditableEntity
     public virtual ICollection<RefreshToken> RefreshTokens { get; private set; } = new List<RefreshToken>();
     public virtual ICollection<Address> Addresses { get; private set; } = new List<Address>();
     public virtual ICollection<Order> Orders { get; private set; } = new List<Order>();
-    public virtual ICollection<Order> FruverOrders { get; private set; } = new List<Order>();
     public virtual BeeFiSubscription? BeeFiSubscription { get; private set; }
     public virtual LoyaltyPoints? LoyaltyPoints { get; private set; }
     public virtual ICollection<FruverProduct> FruverProducts { get; private set; } = new List<FruverProduct>();
     public virtual ICollection<FruverZone> FruverZones { get; private set; } = new List<FruverZone>();
+    public virtual ICollection<DeliveryPersonZone> DeliveryZones { get; private set; } = new List<DeliveryPersonZone>();
     public virtual ICollection<Notification> Notifications { get; private set; } = new List<Notification>();
     public virtual ICollection<DeviceToken> DeviceTokens { get; private set; } = new List<DeviceToken>();
 

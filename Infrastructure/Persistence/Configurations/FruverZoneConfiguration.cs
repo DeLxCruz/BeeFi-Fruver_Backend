@@ -17,10 +17,12 @@ public class FruverZoneConfiguration : IEntityTypeConfiguration<FruverZone>
 
         builder.HasOne(fz => fz.Fruver)
             .WithMany(u => u.FruverZones)
-            .HasForeignKey(fz => fz.FruverId);
+            .HasForeignKey(fz => fz.FruverId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(fz => fz.Zone)
             .WithMany(z => z.FruverZones)
-            .HasForeignKey(fz => fz.ZoneId);
+            .HasForeignKey(fz => fz.ZoneId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

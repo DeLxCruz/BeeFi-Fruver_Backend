@@ -32,6 +32,14 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.Property(p => p.GatewayResponse)
             .HasColumnType("nvarchar(max)");
 
+        builder.Property(p => p.RefundAmount)
+            .HasPrecision(18, 2);
+
+        builder.Property(p => p.RefundedAt);
+
+        builder.Property(p => p.RefundReason)
+            .HasMaxLength(500);
+
         builder.Property(p => p.CreatedAt)
             .IsRequired();
 

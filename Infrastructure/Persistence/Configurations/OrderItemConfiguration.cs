@@ -31,6 +31,7 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
             .HasMaxLength(500);
 
         builder.HasIndex(oi => oi.OrderId);
+        builder.HasIndex(oi => oi.FruverId);
 
         builder.HasOne(oi => oi.Order)
             .WithMany(o => o.Items)
@@ -39,6 +40,11 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
         builder.HasOne(oi => oi.FruverProduct)
             .WithMany(fp => fp.OrderItems)
             .HasForeignKey(oi => oi.FruverProductId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(oi => oi.Fruver)
+            .WithMany()
+            .HasForeignKey(oi => oi.FruverId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

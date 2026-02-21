@@ -8,7 +8,6 @@ public class Order : Entity, IAuditableEntity
     public string OrderNumber { get; private set; } = null!;
     public Guid UserId { get; private set; }
     public Guid AddressId { get; private set; }
-    public Guid FruverId { get; private set; }
     public OrderStatus Status { get; private set; }
 
     public decimal Subtotal { get; private set; }
@@ -31,7 +30,6 @@ public class Order : Entity, IAuditableEntity
     // Navigation properties
     public virtual User User { get; set; } = null!;
     public virtual Address Address { get; set; } = null!;
-    public virtual User Fruver { get; set; } = null!;
     public virtual ICollection<OrderItem> Items { get; private set; } = new List<OrderItem>();
     public virtual Payment? Payment { get; private set; }
     public virtual Delivery? Delivery { get; private set; }
@@ -46,7 +44,6 @@ public class Order : Entity, IAuditableEntity
         string orderNumber,
         Guid userId,
         Guid addressId,
-        Guid fruverId,
         decimal subtotal,
         decimal deliveryFee,
         decimal discount,
@@ -61,7 +58,6 @@ public class Order : Entity, IAuditableEntity
             OrderNumber = orderNumber,
             UserId = userId,
             AddressId = addressId,
-            FruverId = fruverId,
             Status = OrderStatus.Pending,
             Subtotal = subtotal,
             DeliveryFee = deliveryFee,

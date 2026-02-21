@@ -36,6 +36,9 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("HouseNumber")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -46,18 +49,21 @@ namespace Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
                     b.Property<string>("Label")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<decimal?>("Latitude")
-                        .HasPrecision(10, 7)
-                        .HasColumnType("decimal(10,7)");
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("float");
 
-                    b.Property<decimal?>("Longitude")
-                        .HasPrecision(10, 7)
-                        .HasColumnType("decimal(10,7)");
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("float");
 
                     b.Property<string>("Street")
                         .IsRequired()
@@ -129,6 +135,53 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UserId", "Timestamp");
 
                     b.ToTable("AuditLogs", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.Banner", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("EndsAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("LinkUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("StartsAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive", "DisplayOrder");
+
+                    b.ToTable("Banners", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.BeeFiBenefit", b =>
@@ -267,9 +320,9 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("7ce37961-f9e0-48f8-bcb7-62b557771f5c"),
+                            Id = new Guid("3ddfad6c-fa4f-49ed-a33f-4a294d555c03"),
                             BonusPointsMultiplier = 1,
-                            CreatedAt = new DateTime(2025, 11, 3, 14, 9, 46, 940, DateTimeKind.Utc).AddTicks(2517),
+                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 979, DateTimeKind.Utc).AddTicks(4652),
                             Description = "Plan básico de internet con beneficios en BeeFi",
                             DiscountPercentage = 5m,
                             FreeDeliveriesPerMonth = 1,
@@ -283,9 +336,9 @@ namespace Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("e1bcaeae-7364-4651-a0df-a7fd114528af"),
+                            Id = new Guid("ddccdbc7-ba86-4789-bd38-3f5fc33090d5"),
                             BonusPointsMultiplier = 2,
-                            CreatedAt = new DateTime(2025, 11, 3, 14, 9, 46, 940, DateTimeKind.Utc).AddTicks(2520),
+                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 979, DateTimeKind.Utc).AddTicks(4655),
                             Description = "Plan plus con más beneficios",
                             DiscountPercentage = 10m,
                             FreeDeliveriesPerMonth = 3,
@@ -299,9 +352,9 @@ namespace Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("5496fff2-f866-49f1-9dbb-969f49b01999"),
+                            Id = new Guid("b58b466d-64af-488f-b74c-90ddbd4825ad"),
                             BonusPointsMultiplier = 3,
-                            CreatedAt = new DateTime(2025, 11, 3, 14, 9, 46, 940, DateTimeKind.Utc).AddTicks(2521),
+                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 979, DateTimeKind.Utc).AddTicks(4656),
                             Description = "Plan premium con todos los beneficios",
                             DiscountPercentage = 15m,
                             FreeDeliveriesPerMonth = 5,
@@ -384,6 +437,39 @@ namespace Infrastructure.Migrations
                     b.ToTable("BeeFiSubscriptions", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Entities.CartItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("AddedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("FruverProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FruverProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "FruverProductId")
+                        .IsUnique();
+
+                    b.ToTable("CartItems", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Entities.Category", b =>
                 {
                     b.Property<Guid>("Id")
@@ -430,8 +516,8 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("1a618b32-a98d-4ee4-9f90-d7771eb7a494"),
-                            CreatedAt = new DateTime(2025, 11, 3, 14, 9, 46, 941, DateTimeKind.Utc).AddTicks(2148),
+                            Id = new Guid("d4f7e198-5a6a-4ae4-a6a9-fa3a3b33acf5"),
+                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 981, DateTimeKind.Utc).AddTicks(5005),
                             Description = "Frutas frescas",
                             DisplayOrder = 1,
                             IconUrl = "/icons/fruits.png",
@@ -440,8 +526,8 @@ namespace Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("9134d0f7-22bd-45e3-aff7-ec780ce33343"),
-                            CreatedAt = new DateTime(2025, 11, 3, 14, 9, 46, 941, DateTimeKind.Utc).AddTicks(2151),
+                            Id = new Guid("fe31a0fe-2b4a-4157-a209-1a193f64eb52"),
+                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 981, DateTimeKind.Utc).AddTicks(5008),
                             Description = "Verduras frescas",
                             DisplayOrder = 2,
                             IconUrl = "/icons/vegetables.png",
@@ -450,8 +536,8 @@ namespace Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("0aacce53-73d5-43aa-b001-21068c5bd59b"),
-                            CreatedAt = new DateTime(2025, 11, 3, 14, 9, 46, 941, DateTimeKind.Utc).AddTicks(2151),
+                            Id = new Guid("8d0d4260-3c22-4a82-9f3b-784cfa790654"),
+                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 981, DateTimeKind.Utc).AddTicks(5009),
                             Description = "Productos lácteos",
                             DisplayOrder = 3,
                             IconUrl = "/icons/dairy.png",
@@ -460,8 +546,8 @@ namespace Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("8aba14fb-9a6d-41e5-b8ed-251fbf3da196"),
-                            CreatedAt = new DateTime(2025, 11, 3, 14, 9, 46, 941, DateTimeKind.Utc).AddTicks(2152),
+                            Id = new Guid("f25d815f-2594-4e30-8a2f-6176fdc2c994"),
+                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 981, DateTimeKind.Utc).AddTicks(5010),
                             Description = "Carnes y embutidos",
                             DisplayOrder = 4,
                             IconUrl = "/icons/meat.png",
@@ -511,6 +597,38 @@ namespace Infrastructure.Migrations
                     b.ToTable("Deliveries", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Entities.DeliveryPersonZone", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("DeliveryPersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<Guid>("ZoneId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeliveryPersonId");
+
+                    b.HasIndex("ZoneId");
+
+                    b.HasIndex("DeliveryPersonId", "ZoneId")
+                        .IsUnique();
+
+                    b.ToTable("DeliveryPersonZones", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Entities.DeliveryStatusHistory", b =>
                 {
                     b.Property<Guid>("Id")
@@ -520,13 +638,11 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("DeliveryId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal?>("Latitude")
-                        .HasPrecision(10, 7)
-                        .HasColumnType("decimal(10,7)");
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("float");
 
-                    b.Property<decimal?>("Longitude")
-                        .HasPrecision(10, 7)
-                        .HasColumnType("decimal(10,7)");
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("float");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(500)
@@ -788,9 +904,6 @@ namespace Infrastructure.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<Guid>("FruverId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Notes")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
@@ -838,8 +951,6 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("Status");
 
-                    b.HasIndex("FruverId", "Status");
-
                     b.HasIndex("UserId", "CreatedAt");
 
                     b.ToTable("Orders", (string)null);
@@ -849,6 +960,9 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("FruverId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("FruverProductId")
@@ -878,6 +992,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FruverId");
 
                     b.HasIndex("FruverProductId");
 
@@ -910,6 +1026,17 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("RefundAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("RefundReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("RefundedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Status")
@@ -1104,6 +1231,62 @@ namespace Infrastructure.Migrations
                     b.ToTable("RefreshTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Entities.Review", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("FruverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsVisible")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FruverId");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("UserId", "OrderId")
+                        .IsUnique();
+
+                    b.ToTable("Reviews", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Reviews_Rating", "[Rating] >= 1 AND [Rating] <= 5");
+                        });
+                });
+
             modelBuilder.Entity("Domain.Entities.Reward", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1194,29 +1377,29 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("1f1a9117-76f6-4041-b452-3f14c74bf6f3"),
-                            CreatedAt = new DateTime(2025, 11, 3, 14, 9, 46, 954, DateTimeKind.Utc).AddTicks(1175),
+                            Id = new Guid("e93bd156-71f2-4d7e-836b-224752e64a66"),
+                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 997, DateTimeKind.Utc).AddTicks(3365),
                             Description = "Usuario final que compra productos",
                             Name = "Cliente"
                         },
                         new
                         {
-                            Id = new Guid("478de043-fc0a-4481-ace6-d388fc840ce8"),
-                            CreatedAt = new DateTime(2025, 11, 3, 14, 9, 46, 954, DateTimeKind.Utc).AddTicks(1178),
+                            Id = new Guid("24af6f6c-1269-449b-9b63-fd6d1e49433a"),
+                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 997, DateTimeKind.Utc).AddTicks(3371),
                             Description = "Vendedor que publica y gestiona productos",
                             Name = "FruverAliado"
                         },
                         new
                         {
-                            Id = new Guid("0eb3c4c1-f67e-4feb-a765-a6539452c71a"),
-                            CreatedAt = new DateTime(2025, 11, 3, 14, 9, 46, 954, DateTimeKind.Utc).AddTicks(1190),
+                            Id = new Guid("a45227e0-cb30-4924-9338-2ad0de80661c"),
+                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 997, DateTimeKind.Utc).AddTicks(3372),
                             Description = "Personal de entregas y logística",
                             Name = "Empleado"
                         },
                         new
                         {
-                            Id = new Guid("84a29846-7568-48d5-bc7b-ef852b8075a9"),
-                            CreatedAt = new DateTime(2025, 11, 3, 14, 9, 46, 954, DateTimeKind.Utc).AddTicks(1191),
+                            Id = new Guid("22a05b31-2317-4716-8b9e-d7fdcd642ea9"),
+                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 997, DateTimeKind.Utc).AddTicks(3373),
                             Description = "Gestión completa del sistema",
                             Name = "Administrador"
                         });
@@ -1497,6 +1680,25 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Domain.Entities.CartItem", b =>
+                {
+                    b.HasOne("Domain.Entities.FruverProduct", "FruverProduct")
+                        .WithMany()
+                        .HasForeignKey("FruverProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FruverProduct");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Domain.Entities.Category", b =>
                 {
                     b.HasOne("Domain.Entities.Category", "ParentCategory")
@@ -1523,6 +1725,25 @@ namespace Infrastructure.Migrations
                     b.Navigation("DeliveryPerson");
 
                     b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Domain.Entities.DeliveryPersonZone", b =>
+                {
+                    b.HasOne("Domain.Entities.User", "DeliveryPerson")
+                        .WithMany("DeliveryZones")
+                        .HasForeignKey("DeliveryPersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Zone", "Zone")
+                        .WithMany()
+                        .HasForeignKey("ZoneId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DeliveryPerson");
+
+                    b.Navigation("Zone");
                 });
 
             modelBuilder.Entity("Domain.Entities.DeliveryStatusHistory", b =>
@@ -1578,13 +1799,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.User", "Fruver")
                         .WithMany("FruverZones")
                         .HasForeignKey("FruverId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Zone", "Zone")
                         .WithMany("FruverZones")
                         .HasForeignKey("ZoneId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Fruver");
@@ -1622,12 +1843,6 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.User", "Fruver")
-                        .WithMany("FruverOrders")
-                        .HasForeignKey("FruverId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
@@ -1636,13 +1851,17 @@ namespace Infrastructure.Migrations
 
                     b.Navigation("Address");
 
-                    b.Navigation("Fruver");
-
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.OrderItem", b =>
                 {
+                    b.HasOne("Domain.Entities.User", "Fruver")
+                        .WithMany()
+                        .HasForeignKey("FruverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Domain.Entities.FruverProduct", "FruverProduct")
                         .WithMany("OrderItems")
                         .HasForeignKey("FruverProductId")
@@ -1654,6 +1873,8 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Fruver");
 
                     b.Navigation("FruverProduct");
 
@@ -1724,6 +1945,33 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Review", b =>
+                {
+                    b.HasOne("Domain.Entities.User", "Fruver")
+                        .WithMany()
+                        .HasForeignKey("FruverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Fruver");
+
+                    b.Navigation("Order");
 
                     b.Navigation("User");
                 });
@@ -1848,9 +2096,9 @@ namespace Infrastructure.Migrations
 
                     b.Navigation("BeeFiSubscription");
 
-                    b.Navigation("DeviceTokens");
+                    b.Navigation("DeliveryZones");
 
-                    b.Navigation("FruverOrders");
+                    b.Navigation("DeviceTokens");
 
                     b.Navigation("FruverProducts");
 

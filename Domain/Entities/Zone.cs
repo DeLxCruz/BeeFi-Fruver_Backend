@@ -36,6 +36,14 @@ public class Zone : Entity
         };
     }
 
+    public void Update(string name, string city, string department, decimal deliveryBaseCost)
+    {
+        Name = name;
+        City = city;
+        Department = department;
+        DeliveryBaseCost = deliveryBaseCost;
+    }
+
     public void UpdateDeliveryCost(decimal cost)
     {
         DeliveryBaseCost = cost;

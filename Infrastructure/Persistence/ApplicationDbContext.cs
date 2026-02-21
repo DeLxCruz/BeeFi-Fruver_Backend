@@ -56,10 +56,25 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     // Audit
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
+    // Cart
+    public DbSet<CartItem> CartItems => Set<CartItem>();
+
+    // CMS
+    public DbSet<Banner> Banners => Set<Banner>();
+
+    // Reviews
+    public DbSet<Review> Reviews => Set<Review>();
+
+    // Delivery Assignment
+    public DbSet<DeliveryPersonZone> DeliveryPersonZones => Set<DeliveryPersonZone>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Aplicar todas las configuraciones del assembly
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+        // Soft delete global filter
+        modelBuilder.Entity<Address>().HasQueryFilter(a => !a.IsDeleted);
 
         base.OnModelCreating(modelBuilder);
     }

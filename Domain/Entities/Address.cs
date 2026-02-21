@@ -10,9 +10,11 @@ public class Address : Entity
     public string Street { get; private set; } = null!;
     public string HouseNumber { get; private set; } = null!;
     public string AdditionalInfo { get; private set; } = null!;
-    public decimal? Latitude { get; private set; }
-    public decimal? Longitude { get; private set; }
+    public double? Latitude { get; private set; }
+    public double? Longitude { get; private set; }
     public bool IsDefault { get; private set; }
+    public bool IsDeleted { get; private set; } = false;
+    public DateTime? DeletedAt { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
     // Navigation properties
@@ -31,8 +33,8 @@ public class Address : Entity
         string street,
         string houseNumber,
         string additionalInfo,
-        decimal? latitude = null,
-        decimal? longitude = null,
+        double? latitude = null,
+        double? longitude = null,
         bool isDefault = false)
     {
         return new Address(Guid.NewGuid())
@@ -74,7 +76,13 @@ public class Address : Entity
         IsDefault = false;
     }
 
-    public void UpdateCoordinates(decimal latitude, decimal longitude)
+    public void Delete()
+    {
+        IsDeleted = true;
+        DeletedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateCoordinates(double latitude, double longitude)
     {
         Latitude = latitude;
         Longitude = longitude;

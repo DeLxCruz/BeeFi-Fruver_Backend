@@ -20,10 +20,10 @@ public class DeliveryStatusHistoryConfiguration : IEntityTypeConfiguration<Deliv
             .IsRequired();
 
         builder.Property(dsh => dsh.Latitude)
-            .HasPrecision(10, 7);
+            .HasColumnType("float");
 
         builder.Property(dsh => dsh.Longitude)
-            .HasPrecision(10, 7);
+            .HasColumnType("float");
 
         builder.Property(dsh => dsh.Notes)
             .HasMaxLength(500);

@@ -53,6 +53,18 @@ public interface IApplicationDbContext
     // Audit
     DbSet<AuditLog> AuditLogs { get; }
 
+    // Cart
+    DbSet<CartItem> CartItems { get; }
+
+    // CMS
+    DbSet<Banner> Banners { get; }
+
+    // Reviews
+    DbSet<Review> Reviews { get; }
+
+    // Delivery Assignment
+    DbSet<DeliveryPersonZone> DeliveryPersonZones { get; }
+
     // Método para guardar cambios
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 

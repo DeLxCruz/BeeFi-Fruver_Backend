@@ -29,14 +29,20 @@ public class AddressConfiguration : IEntityTypeConfiguration<Address>
             .HasMaxLength(500);
 
         builder.Property(a => a.Latitude)
-            .HasPrecision(10, 7);
+            .HasColumnType("float");
 
         builder.Property(a => a.Longitude)
-            .HasPrecision(10, 7);
+            .HasColumnType("float");
 
         builder.Property(a => a.IsDefault)
             .IsRequired()
             .HasDefaultValue(false);
+
+        builder.Property(a => a.IsDeleted)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(a => a.DeletedAt);
 
         builder.Property(a => a.CreatedAt)
             .IsRequired();

@@ -95,11 +95,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasForeignKey(o => o.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasMany(u => u.FruverOrders)
-            .WithOne(o => o.Fruver)
-            .HasForeignKey(o => o.FruverId)
-            .OnDelete(DeleteBehavior.Restrict);
-
         builder.HasOne(u => u.BeeFiSubscription)
             .WithOne(s => s.User)
             .HasForeignKey<BeeFiSubscription>(s => s.UserId)
@@ -124,5 +119,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .WithOne(dt => dt.User)
             .HasForeignKey(dt => dt.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(u => u.DeliveryZones)
+            .WithOne(dpz => dpz.DeliveryPerson)
+            .HasForeignKey(dpz => dpz.DeliveryPersonId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

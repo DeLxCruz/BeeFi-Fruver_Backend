@@ -12,6 +12,9 @@ public class Payment : Entity
     public string? TransactionId { get; private set; }
     public string? GatewayResponse { get; private set; }
     public DateTime? PaymentDate { get; private set; }
+    public decimal? RefundAmount { get; private set; }
+    public DateTime? RefundedAt { get; private set; }
+    public string? RefundReason { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
     // Navigation properties
@@ -55,11 +58,17 @@ public class Payment : Entity
         GatewayResponse = gatewayResponse;
     }
 
-    public void Refund()
+    public void Refund(decimal amount, string reason)
     {
         if (Status != PaymentStatus.Completed)
             throw new InvalidOperationException("Solo se pueden reembolsar pagos completados");
 
+        if (amount <= 0 || amount > Amount)
+            throw new InvalidOperationException($"Monto de reembolso inválido. Máximo permitido: {Amount}");
+
         Status = PaymentStatus.Refunded;
+        RefundAmount = amount;
+        RefundedAt = DateTime.UtcNow;
+        RefundReason = reason;
     }
 }
