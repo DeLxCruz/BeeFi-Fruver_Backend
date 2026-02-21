@@ -56,6 +56,26 @@ public class Reward : Entity
         return IsActive && (ExpirationDate == null || ExpirationDate > DateTime.UtcNow);
     }
 
+    public void Update(
+        string name,
+        string description,
+        string? imageUrl,
+        int pointsRequired,
+        decimal value,
+        bool isActive,
+        int maxRedemptionsPerUser,
+        DateTime? expirationDate)
+    {
+        Name = name;
+        Description = description;
+        ImageUrl = imageUrl;
+        PointsRequired = pointsRequired;
+        Value = value;
+        IsActive = isActive;
+        MaxRedemptionsPerUser = maxRedemptionsPerUser;
+        ExpirationDate = expirationDate;
+    }
+
     public void Deactivate()
     {
         IsActive = false;

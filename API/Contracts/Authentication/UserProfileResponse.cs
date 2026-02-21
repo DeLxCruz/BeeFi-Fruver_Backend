@@ -38,7 +38,7 @@ public record UserProfileResponse
     /// <summary>
     /// Nombre del plan BeeFi (si tiene suscripción activa)
     /// </summary>
-    public string BeeFiPlanName { get; init; }
+    public string? BeeFiPlanName { get; init; }
 
     /// <summary>
     /// Porcentaje de descuento del plan (si tiene suscripción activa)

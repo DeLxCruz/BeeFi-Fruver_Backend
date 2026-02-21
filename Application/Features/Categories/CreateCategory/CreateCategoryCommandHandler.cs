@@ -11,10 +11,12 @@ public class CreateCategoryCommandHandler
     : IRequestHandler<CreateCategoryCommand, Result<CreateCategoryResponse>>
 {
     private readonly IApplicationDbContext _context;
+    private readonly ICacheService _cache;
 
-    public CreateCategoryCommandHandler(IApplicationDbContext context)
+    public CreateCategoryCommandHandler(IApplicationDbContext context, ICacheService cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     public async Task<Result<CreateCategoryResponse>> Handle(
@@ -52,6 +54,7 @@ public class CreateCategoryCommandHandler
 
         _context.Categories.Add(category);
         await _context.SaveChangesAsync(cancellationToken);
+        await _cache.RemoveAsync("categories:tree", cancellationToken);
 
         return Result.Success(new CreateCategoryResponse(
             category.Id,

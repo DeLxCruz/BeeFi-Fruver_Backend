@@ -11,13 +11,40 @@ public class GetCatalogByZoneQueryHandler
     : IRequestHandler<GetCatalogByZoneQuery, Result<PaginatedList<ZoneCatalogDto>>>
 {
     private readonly IApplicationDbContext _context;
+    private readonly ICacheService _cache;
 
-    public GetCatalogByZoneQueryHandler(IApplicationDbContext context)
+    public GetCatalogByZoneQueryHandler(IApplicationDbContext context, ICacheService cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     public async Task<Result<PaginatedList<ZoneCatalogDto>>> Handle(
+        GetCatalogByZoneQuery request,
+        CancellationToken cancellationToken)
+    {
+        // Only cache when there is no search term (results are stable)
+        var useCache = string.IsNullOrWhiteSpace(request.SearchTerm);
+        var cacheKey = $"catalog:zone:{request.ZoneId}:cat:{request.CategoryId}:p:{request.PageNumber}";
+
+        if (useCache)
+        {
+            var cached = await _cache.GetAsync<PaginatedList<ZoneCatalogDto>>(cacheKey, cancellationToken);
+            if (cached is not null)
+                return Result.Success(cached);
+        }
+
+        var result = await FetchFromDbAsync(request, cancellationToken);
+        if (result.IsFailure)
+            return result;
+
+        if (useCache)
+            await _cache.SetAsync(cacheKey, result.Value, TimeSpan.FromMinutes(3), cancellationToken);
+
+        return result;
+    }
+
+    private async Task<Result<PaginatedList<ZoneCatalogDto>>> FetchFromDbAsync(
         GetCatalogByZoneQuery request,
         CancellationToken cancellationToken)
     {

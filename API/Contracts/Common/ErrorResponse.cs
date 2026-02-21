@@ -25,30 +25,30 @@ public record ErrorResponse
     /// <summary>
     /// ID de trazabilidad para seguimiento en logs
     /// </summary>
-    public string TraceId { get; init; }
+    public string? TraceId { get; init; }
 
     /// <summary>
     /// Ruta del endpoint donde ocurrió el error
     /// </summary>
-    public string Path { get; init; }
+    public string? Path { get; init; }
 
     /// <summary>
     /// Errores de validación específicos (para errores 400)
     /// </summary>
-    public IEnumerable<ValidationError> ValidationErrors { get; init; }
+    public IEnumerable<ValidationError>? ValidationErrors { get; init; }
 
     /// <summary>
     /// Información adicional del error (solo en desarrollo)
     /// </summary>
-    public object Details { get; init; }
+    public object? Details { get; init; }
 
     public ErrorResponse(
         string code,
         string message,
-        string traceId = null,
-        string path = null,
-        IEnumerable<ValidationError> validationErrors = null,
-        object details = null)
+        string? traceId = null,
+        string? path = null,
+        IEnumerable<ValidationError>? validationErrors = null,
+        object? details = null)
     {
         Code = code;
         Message = message;
@@ -66,6 +66,6 @@ public record ErrorResponse
 public record ValidationError(
     string Field,
     string Message,
-    string Code = null,
-    object AttemptedValue = null
+    string? Code = null,
+    object? AttemptedValue = null
 );

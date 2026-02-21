@@ -1,13 +1,11 @@
-using API.Contracts.Common;
 using FluentValidation;
-using System.Net;
-using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 
 namespace API.Middleware;
 
 /// <summary>
-/// Middleware para manejo global de excepciones
-/// Captura todas las excepciones no manejadas y las convierte en respuestas HTTP estandarizadas
+/// Middleware para manejo global de excepciones.
+/// Convierte todas las excepciones no manejadas en respuestas Problem Details (RFC 9457).
 /// </summary>
 public class GlobalExceptionHandlingMiddleware(
     RequestDelegate next,
@@ -28,9 +26,10 @@ public class GlobalExceptionHandlingMiddleware(
         {
             _logger.LogError(
                 exception,
-                "An unhandled exception occurred. TraceId: {TraceId}, Path: {Path}",
+                "Unhandled exception. TraceId: {TraceId}, Path: {Path}, Method: {Method}",
                 context.TraceIdentifier,
-                context.Request.Path);
+                context.Request.Path,
+                context.Request.Method);
 
             await HandleExceptionAsync(context, exception);
         }
@@ -38,149 +37,80 @@ public class GlobalExceptionHandlingMiddleware(
 
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        // ✅ Solo modificar headers/response si NO ha empezado
         if (context.Response.HasStarted)
         {
-            _logger.LogWarning("Response has already started, cannot modify headers/body for exception handling");
+            _logger.LogWarning("Response already started — cannot write error response for TraceId: {TraceId}", context.TraceIdentifier);
             return;
         }
 
-        context.Response.ContentType = "application/json";
-
-        var (statusCode, errorResponse) = exception switch
+        var (statusCode, problemDetails) = exception switch
         {
-            ValidationException validationException => HandleValidationException(
-                context,
-                validationException),
-
-            UnauthorizedAccessException => HandleUnauthorizedException(context),
-
-            KeyNotFoundException notFoundException => HandleNotFoundException(
-                context,
-                notFoundException),
-
-            InvalidOperationException invalidOperationException => HandleInvalidOperationException(
-                context,
-                invalidOperationException),
-
-            ArgumentException argumentException => HandleArgumentException(
-                context,
-                argumentException),
-
-            _ => HandleUnknownException(context, exception)
+            ValidationException validationException => BuildValidationProblem(context, validationException),
+            UnauthorizedAccessException => BuildProblem(context, 401,
+                "https://tools.ietf.org/html/rfc9110#section-15.5.2",
+                "Unauthorized",
+                "No tienes autorización para acceder a este recurso."),
+            KeyNotFoundException keyNotFoundException => BuildProblem(context, 404,
+                "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+                "Not Found",
+                keyNotFoundException.Message),
+            InvalidOperationException invalidOpException => BuildProblem(context, 400,
+                "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                "Bad Request",
+                invalidOpException.Message),
+            ArgumentException argumentException => BuildProblem(context, 400,
+                "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                "Bad Request",
+                argumentException.Message),
+            _ => BuildProblem(context, 500,
+                "https://tools.ietf.org/html/rfc9110#section-15.6.1",
+                "Internal Server Error",
+                _environment.IsDevelopment()
+                    ? exception.Message
+                    : "Ocurrió un error interno en el servidor.")
         };
 
-        context.Response.StatusCode = (int)statusCode;
+        context.Response.ContentType = "application/problem+json";
+        context.Response.StatusCode = statusCode;
 
-        var options = new JsonSerializerOptions
+        await context.Response.WriteAsJsonAsync(problemDetails);
+    }
+
+    private static (int, ProblemDetails) BuildProblem(
+        HttpContext context, int status, string type, string title, string detail)
+    {
+        var problem = new ProblemDetails
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            WriteIndented = _environment.IsDevelopment()
+            Type = type,
+            Title = title,
+            Status = status,
+            Detail = detail,
+            Instance = context.Request.Path
         };
-
-        var json = JsonSerializer.Serialize(errorResponse, options);
-        await context.Response.WriteAsync(json);
+        problem.Extensions["traceId"] = context.TraceIdentifier;
+        return (status, problem);
     }
 
-    private (HttpStatusCode, ErrorResponse) HandleValidationException(
-        HttpContext context,
-        ValidationException exception)
+    private (int, ProblemDetails) BuildValidationProblem(
+        HttpContext context, ValidationException exception)
     {
-        var validationErrors = exception.Errors
-            .Select(error => new ValidationError(
-                Field: error.PropertyName,
-                Message: error.ErrorMessage,
-                Code: error.ErrorCode,
-                AttemptedValue: error.AttemptedValue))
-            .ToList();
+        var errors = exception.Errors
+            .GroupBy(e => e.PropertyName)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(e => e.ErrorMessage).ToArray());
 
-        var errorResponse = new ErrorResponse(
-            code: "Validation.Failed",
-            message: "Uno o más errores de validación ocurrieron",
-            traceId: context.TraceIdentifier,
-            path: context.Request.Path,
-            validationErrors: validationErrors,
-            details: _environment.IsDevelopment() ? exception.StackTrace : null);
+        var problem = new ProblemDetails
+        {
+            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+            Title = "Bad Request",
+            Status = 400,
+            Detail = "One or more validation errors occurred.",
+            Instance = context.Request.Path
+        };
+        problem.Extensions["traceId"] = context.TraceIdentifier;
+        problem.Extensions["errors"] = errors;
 
-        return (HttpStatusCode.BadRequest, errorResponse);
-    }
-
-    private (HttpStatusCode, ErrorResponse) HandleUnauthorizedException(HttpContext context)
-    {
-        var errorResponse = new ErrorResponse(
-            code: "Authorization.Unauthorized",
-            message: "No tienes autorización para acceder a este recurso",
-            traceId: context.TraceIdentifier,
-            path: context.Request.Path);
-
-        return (HttpStatusCode.Unauthorized, errorResponse);
-    }
-
-    private (HttpStatusCode, ErrorResponse) HandleNotFoundException(
-        HttpContext context,
-        KeyNotFoundException exception)
-    {
-        var errorResponse = new ErrorResponse(
-            code: "Resource.NotFound",
-            message: exception.Message,
-            traceId: context.TraceIdentifier,
-            path: context.Request.Path,
-            details: _environment.IsDevelopment() ? exception.StackTrace : null);
-
-        return (HttpStatusCode.NotFound, errorResponse);
-    }
-
-    private (HttpStatusCode, ErrorResponse) HandleInvalidOperationException(
-        HttpContext context,
-        InvalidOperationException exception)
-    {
-        var errorResponse = new ErrorResponse(
-            code: "Operation.Invalid",
-            message: exception.Message,
-            traceId: context.TraceIdentifier,
-            path: context.Request.Path,
-            details: _environment.IsDevelopment() ? exception.StackTrace : null);
-
-        return (HttpStatusCode.BadRequest, errorResponse);
-    }
-
-    private (HttpStatusCode, ErrorResponse) HandleArgumentException(
-        HttpContext context,
-        ArgumentException exception)
-    {
-        var errorResponse = new ErrorResponse(
-            code: "Argument.Invalid",
-            message: exception.Message,
-            traceId: context.TraceIdentifier,
-            path: context.Request.Path,
-            details: _environment.IsDevelopment() ? exception.StackTrace : null);
-
-        return (HttpStatusCode.BadRequest, errorResponse);
-    }
-
-    private (HttpStatusCode, ErrorResponse) HandleUnknownException(
-        HttpContext context,
-        Exception exception)
-    {
-        // No exponer detalles internos en producción
-        var message = _environment.IsDevelopment()
-            ? exception.Message
-            : "Ocurrió un error interno en el servidor. Por favor, contacta al administrador.";
-
-        var errorResponse = new ErrorResponse(
-            code: "Server.InternalError",
-            message: message,
-            traceId: context.TraceIdentifier,
-            path: context.Request.Path,
-            details: _environment.IsDevelopment()
-                ? new
-                {
-                    exception.Message,
-                    exception.StackTrace,
-                    InnerException = exception.InnerException?.Message
-                }
-                : null);
-
-        return (HttpStatusCode.InternalServerError, errorResponse);
+        return (400, problem);
     }
 }

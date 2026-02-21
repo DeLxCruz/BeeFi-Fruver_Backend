@@ -111,6 +111,17 @@ public static class DependencyInjection
         services.AddScoped<IPaymentGateway, MockPaymentGateway>();
 
         // ========================================
+        // 🔔 PUSH NOTIFICATION SERVICE
+        // ========================================
+        services.AddScoped<IPushNotificationService, MockPushNotificationService>();
+
+        // ========================================
+        // 💾 CACHING
+        // ========================================
+        services.AddMemoryCache();
+        services.AddScoped<ICacheService, MemoryCacheService>();
+
+        // ========================================
         // 🌐 BEEFI API CLIENT
         // ========================================
         services.Configure<BeeFiApiSettings>(configuration.GetSection(BeeFiApiSettings.SectionName));

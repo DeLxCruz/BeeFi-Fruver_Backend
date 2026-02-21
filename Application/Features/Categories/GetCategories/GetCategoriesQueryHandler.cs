@@ -10,15 +10,30 @@ public class GetCategoriesQueryHandler
     : IRequestHandler<GetCategoriesQuery, Result<List<CategoryDto>>>
 {
     private readonly IApplicationDbContext _context;
+    private readonly ICacheService _cache;
 
-    public GetCategoriesQueryHandler(IApplicationDbContext context)
+    public const string CacheKey = "categories:tree";
+
+    public GetCategoriesQueryHandler(IApplicationDbContext context, ICacheService cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     public async Task<Result<List<CategoryDto>>> Handle(
         GetCategoriesQuery request,
         CancellationToken cancellationToken)
+    {
+        var result = await _cache.GetOrCreateAsync(
+            CacheKey,
+            () => BuildCategoryTreeAsync(cancellationToken),
+            TimeSpan.FromMinutes(15),
+            cancellationToken);
+
+        return Result.Success(result);
+    }
+
+    private async Task<List<CategoryDto>> BuildCategoryTreeAsync(CancellationToken cancellationToken)
     {
         // Cargar todas las categorías activas en una sola query
         var allCategories = await _context.Categories
@@ -65,6 +80,6 @@ public class GetCategoriesQueryHandler
             }
         }
 
-        return Result.Success(roots);
+        return roots;
     }
 }

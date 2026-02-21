@@ -10,10 +10,12 @@ public class UpdateZoneCommandHandler
     : IRequestHandler<UpdateZoneCommand, Result>
 {
     private readonly IApplicationDbContext _context;
+    private readonly ICacheService _cache;
 
-    public UpdateZoneCommandHandler(IApplicationDbContext context)
+    public UpdateZoneCommandHandler(IApplicationDbContext context, ICacheService cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     public async Task<Result> Handle(
@@ -34,6 +36,7 @@ public class UpdateZoneCommandHandler
             zone.Deactivate();
 
         await _context.SaveChangesAsync(cancellationToken);
+        await _cache.RemoveAsync("zones:active", cancellationToken);
 
         return Result.Success();
     }

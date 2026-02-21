@@ -1,4 +1,6 @@
 using API.Contracts.Deliveries;
+using API.Extensions;
+using Asp.Versioning;
 using Application.Features.Deliveries.AssignDeliveryPerson;
 using Application.Features.Deliveries.AssignDeliveryPersonToZone;
 using Application.Features.Deliveries.CreateDelivery;
@@ -12,14 +14,17 @@ using Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace API.Controllers;
 
 /// <summary>
 /// Controlador para gestión de entregas y logística
 /// </summary>
+[ApiVersion(1)]
 [ApiController]
-[Route("api/v1/deliveries")]
+[EnableRateLimiting("GlobalPolicy")]
+[Route("api/v{v:apiVersion}/deliveries")]
 [Authorize]
 public class DeliveriesController : ControllerBase
 {
@@ -45,9 +50,7 @@ public class DeliveriesController : ControllerBase
         if (result.IsSuccess)
             return Ok(result.Value);
 
-        return result.Error.Code.Contains("NotFound")
-            ? NotFound(result.Error)
-            : BadRequest(result.Error);
+        return result.ToProblemDetails();
     }
 
     /// <summary>
@@ -66,7 +69,7 @@ public class DeliveriesController : ControllerBase
         var query = new GetMyDeliveriesQuery(status, pageNumber, pageSize);
         var result = await _mediator.Send(query);
 
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -89,7 +92,7 @@ public class DeliveriesController : ControllerBase
         var query = new GetAllDeliveriesQuery(status, deliveryPersonId, zoneId, fromDate, toDate, pageNumber, pageSize);
         var result = await _mediator.Send(query);
 
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -110,7 +113,7 @@ public class DeliveriesController : ControllerBase
             ? CreatedAtAction(nameof(GetDeliveryByOrder),
                 new { orderId = request.OrderId },
                 new { deliveryId = result.Value })
-            : BadRequest(result.Error);
+            : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -131,9 +134,7 @@ public class DeliveriesController : ControllerBase
         if (result.IsSuccess)
             return Ok(new { message = "Repartidor asignado exitosamente" });
 
-        return result.Error.Code.Contains("NotFound")
-            ? NotFound(result.Error)
-            : BadRequest(result.Error);
+        return result.ToProblemDetails();
     }
 
     /// <summary>
@@ -159,9 +160,7 @@ public class DeliveriesController : ControllerBase
         if (result.IsSuccess)
             return Ok(new { message = "Estado de entrega actualizado" });
 
-        return result.Error.Code.Contains("NotFound")
-            ? NotFound(result.Error)
-            : BadRequest(result.Error);
+        return result.ToProblemDetails();
     }
 
     /// <summary>
@@ -180,7 +179,7 @@ public class DeliveriesController : ControllerBase
 
         return result.IsSuccess
             ? Ok(new { message = "Repartidor asignado a la zona exitosamente" })
-            : BadRequest(result.Error);
+            : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -201,8 +200,6 @@ public class DeliveriesController : ControllerBase
         if (result.IsSuccess)
             return Ok(new { message = "Asignación de zona eliminada exitosamente" });
 
-        return result.Error.Code.Contains("NotFound")
-            ? NotFound(result.Error)
-            : BadRequest(result.Error);
+        return result.ToProblemDetails();
     }
 }

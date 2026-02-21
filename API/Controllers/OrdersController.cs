@@ -1,4 +1,6 @@
 using API.Contracts.Orders;
+using API.Extensions;
+using Asp.Versioning;
 using Application.Features.Orders.CancelOrder;
 using Application.Features.Orders.CreateOrder;
 using Application.Features.Orders.GetAllOrders;
@@ -10,14 +12,17 @@ using Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace API.Controllers;
 
 /// <summary>
 /// Controlador para gestión de pedidos
 /// </summary>
+[ApiVersion(1)]
 [ApiController]
-[Route("api/v1/orders")]
+[EnableRateLimiting("GlobalPolicy")]
+[Route("api/v{v:apiVersion}/orders")]
 [Authorize]
 public class OrdersController : ControllerBase
 {
@@ -36,7 +41,7 @@ public class OrdersController : ControllerBase
     public async Task<IActionResult> GetMyOrders([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var result = await _mediator.Send(new GetMyOrdersQuery(pageNumber, pageSize));
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -52,7 +57,7 @@ public class OrdersController : ControllerBase
         [FromQuery] string? search = null)
     {
         var result = await _mediator.Send(new GetAllOrdersQuery(pageNumber, pageSize, status, search));
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -69,12 +74,7 @@ public class OrdersController : ControllerBase
         if (result.IsSuccess)
             return Ok(result.Value);
 
-        return result.Error.Code switch
-        {
-            "Order.NotFound" => NotFound(result.Error),
-            "Order.NotOwner" => Forbid(),
-            _ => BadRequest(result.Error)
-        };
+        return result.ToProblemDetails();
     }
 
     /// <summary>
@@ -90,7 +90,7 @@ public class OrdersController : ControllerBase
 
         return result.IsSuccess
             ? CreatedAtAction(nameof(GetOrderById), new { orderId = result.Value }, new { id = result.Value })
-            : BadRequest(result.Error);
+            : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -108,11 +108,7 @@ public class OrdersController : ControllerBase
         if (result.IsSuccess)
             return Ok(new { message = "Pedido cancelado exitosamente" });
 
-        return result.Error.Code switch
-        {
-            "Order.NotFound" => NotFound(result.Error),
-            _ => BadRequest(result.Error)
-        };
+        return result.ToProblemDetails();
     }
 
     /// <summary>
@@ -131,10 +127,6 @@ public class OrdersController : ControllerBase
         if (result.IsSuccess)
             return Ok(new { message = "Estado del pedido actualizado" });
 
-        return result.Error.Code switch
-        {
-            "Order.NotFound" => NotFound(result.Error),
-            _ => BadRequest(result.Error)
-        };
+        return result.ToProblemDetails();
     }
 }

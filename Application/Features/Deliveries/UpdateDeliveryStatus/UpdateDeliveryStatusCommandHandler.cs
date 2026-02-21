@@ -1,4 +1,5 @@
 using Application.Common.Interfaces;
+using Application.Features.Loyalty.EarnPoints;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Errors;
@@ -19,13 +20,16 @@ public class UpdateDeliveryStatusCommandHandler : IRequestHandler<UpdateDelivery
 
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUser;
+    private readonly ISender _sender;
 
     public UpdateDeliveryStatusCommandHandler(
         IApplicationDbContext context,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        ISender sender)
     {
         _context = context;
         _currentUser = currentUser;
+        _sender = sender;
     }
 
     public async Task<Result> Handle(
@@ -75,6 +79,15 @@ public class UpdateDeliveryStatusCommandHandler : IRequestHandler<UpdateDelivery
         }
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Acumular puntos de lealtad al entregar el pedido
+        if (request.NewStatus == DeliveryStatus.Delivered)
+        {
+            await _sender.Send(new EarnPointsCommand(
+                delivery.Order.UserId,
+                delivery.OrderId,
+                delivery.Order.Total), cancellationToken);
+        }
 
         return Result.Success();
     }

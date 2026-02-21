@@ -10,10 +10,12 @@ public class DeleteCategoryCommandHandler
     : IRequestHandler<DeleteCategoryCommand, Result>
 {
     private readonly IApplicationDbContext _context;
+    private readonly ICacheService _cache;
 
-    public DeleteCategoryCommandHandler(IApplicationDbContext context)
+    public DeleteCategoryCommandHandler(IApplicationDbContext context, ICacheService cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     public async Task<Result> Handle(
@@ -35,6 +37,7 @@ public class DeleteCategoryCommandHandler
 
         category.Deactivate();
         await _context.SaveChangesAsync(cancellationToken);
+        await _cache.RemoveAsync("categories:tree", cancellationToken);
 
         return Result.Success();
     }

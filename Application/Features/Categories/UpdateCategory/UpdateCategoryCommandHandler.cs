@@ -10,10 +10,12 @@ public class UpdateCategoryCommandHandler
     : IRequestHandler<UpdateCategoryCommand, Result>
 {
     private readonly IApplicationDbContext _context;
+    private readonly ICacheService _cache;
 
-    public UpdateCategoryCommandHandler(IApplicationDbContext context)
+    public UpdateCategoryCommandHandler(IApplicationDbContext context, ICacheService cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     public async Task<Result> Handle(
@@ -49,6 +51,7 @@ public class UpdateCategoryCommandHandler
         }
 
         await _context.SaveChangesAsync(cancellationToken);
+        await _cache.RemoveAsync("categories:tree", cancellationToken);
 
         return Result.Success();
     }

@@ -101,6 +101,9 @@ try
     // CORS
     app.UseCors(app.Environment.IsDevelopment() ? "AllowDevelopment" : "AllowFlutter");
 
+    // Rate Limiting
+    app.UseRateLimiter();
+
     // Routing (DEBE ir antes de Authentication/Authorization)
     app.UseRouting();
 

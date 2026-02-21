@@ -11,10 +11,12 @@ public class CreateZoneCommandHandler
     : IRequestHandler<CreateZoneCommand, Result<CreateZoneResponse>>
 {
     private readonly IApplicationDbContext _context;
+    private readonly ICacheService _cache;
 
-    public CreateZoneCommandHandler(IApplicationDbContext context)
+    public CreateZoneCommandHandler(IApplicationDbContext context, ICacheService cache)
     {
         _context = context;
+        _cache = cache;
     }
 
     public async Task<Result<CreateZoneResponse>> Handle(
@@ -37,6 +39,7 @@ public class CreateZoneCommandHandler
 
         _context.Zones.Add(zone);
         await _context.SaveChangesAsync(cancellationToken);
+        await _cache.RemoveAsync("zones:active", cancellationToken);
 
         return Result.Success(new CreateZoneResponse(
             zone.Id,

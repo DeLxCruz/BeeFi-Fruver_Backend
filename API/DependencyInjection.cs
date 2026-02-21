@@ -1,7 +1,10 @@
 using API.HealthChecks;
+using Asp.Versioning;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
+using System.Threading.RateLimiting;
 
 namespace API;
 
@@ -21,6 +24,26 @@ public static class DependencyInjection
         // Controllers
         services.AddControllers();
 
+        // Problem Details (RFC 9457)
+        services.AddProblemDetails();
+
+        // API Versioning (Milan Jovanovic pattern)
+        services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new ApiVersion(1);
+            options.ReportApiVersions = true;
+            options.AssumeDefaultVersionWhenUnspecified = true;
+            options.ApiVersionReader = ApiVersionReader.Combine(
+                new UrlSegmentApiVersionReader(),
+                new HeaderApiVersionReader("X-Api-Version"));
+        })
+        .AddMvc()
+        .AddApiExplorer(options =>
+        {
+            options.GroupNameFormat = "'v'V";
+            options.SubstituteApiVersionInUrl = true;
+        });
+
         // Swagger/OpenAPI
         services.AddSwaggerConfiguration();
 
@@ -29,6 +52,9 @@ public static class DependencyInjection
 
         // Health Checks
         services.AddHealthChecksConfiguration(configuration);
+
+        // Rate Limiting
+        services.AddRateLimiterConfiguration();
 
         // 🔧 Deshabilitar Response Compression para Health Checks UI (fix chunked encoding)
         services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
@@ -99,6 +125,43 @@ public static class DependencyInjection
             {
                 c.IncludeXmlComments(xmlPath);
             }
+        });
+
+        return services;
+    }
+
+    private static IServiceCollection AddRateLimiterConfiguration(this IServiceCollection services)
+    {
+        services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            // Política global: 100 requests por minuto por IP
+            options.AddFixedWindowLimiter("GlobalPolicy", limiterOptions =>
+            {
+                limiterOptions.PermitLimit = 100;
+                limiterOptions.Window = TimeSpan.FromMinutes(1);
+                limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                limiterOptions.QueueLimit = 10;
+            });
+
+            // Política estricta para Auth: 10 intentos por minuto por IP
+            options.AddFixedWindowLimiter("AuthPolicy", limiterOptions =>
+            {
+                limiterOptions.PermitLimit = 10;
+                limiterOptions.Window = TimeSpan.FromMinutes(1);
+                limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                limiterOptions.QueueLimit = 0;
+            });
+
+            // Política para endpoints públicos: 200 por minuto
+            options.AddFixedWindowLimiter("PublicPolicy", limiterOptions =>
+            {
+                limiterOptions.PermitLimit = 200;
+                limiterOptions.Window = TimeSpan.FromMinutes(1);
+                limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                limiterOptions.QueueLimit = 5;
+            });
         });
 
         return services;

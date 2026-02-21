@@ -1,19 +1,24 @@
+using API.Extensions;
 using Application.Features.Users.ApproveUser;
 using Application.Features.Users.GetPendingUsers;
 using Application.Features.Users.RejectUser;
 using Application.Features.Users.SuspendUser;
+using Asp.Versioning;
 using Domain.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace API.Controllers;
 
 /// <summary>
 /// Controlador para administración de usuarios
 /// </summary>
+[ApiVersion(1)]
 [ApiController]
-[Route("api/admin/users")]
+[EnableRateLimiting("GlobalPolicy")]
+[Route("api/v{v:apiVersion}/admin/users")]
 [Authorize(Roles = Roles.Administrador)]
 public class AdminUsersController : ControllerBase
 {
@@ -37,7 +42,7 @@ public class AdminUsersController : ControllerBase
 
         return result.IsSuccess
             ? Ok(result.Value)
-            : BadRequest(result.Error);
+            : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -59,9 +64,7 @@ public class AdminUsersController : ControllerBase
             return Ok(new { message = "Usuario aprobado exitosamente" });
         }
 
-        return result.Error.Code == "User.NotFound"
-            ? NotFound(result.Error)
-            : BadRequest(result.Error);
+        return result.ToProblemDetails();
     }
 
     /// <summary>
@@ -84,9 +87,7 @@ public class AdminUsersController : ControllerBase
             return Ok(new { message = "Usuario rechazado exitosamente" });
         }
 
-        return result.Error.Code == "User.NotFound"
-            ? NotFound(result.Error)
-            : BadRequest(result.Error);
+        return result.ToProblemDetails();
     }
 
     /// <summary>
@@ -109,9 +110,7 @@ public class AdminUsersController : ControllerBase
             return Ok(new { message = "Usuario suspendido exitosamente" });
         }
 
-        return result.Error.Code == "User.NotFound"
-            ? NotFound(result.Error)
-            : BadRequest(result.Error);
+        return result.ToProblemDetails();
     }
 }
 

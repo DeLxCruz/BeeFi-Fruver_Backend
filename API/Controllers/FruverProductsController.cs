@@ -1,5 +1,6 @@
-using API.Contracts.Common;
 using API.Contracts.FruverProducts;
+using API.Extensions;
+using Asp.Versioning;
 using Domain.Constants;
 using Application.Common.Models;
 using Application.Features.FruverProducts.GetCatalogByZone;
@@ -12,14 +13,17 @@ using Application.Features.FruverProducts.UpdateStock;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace API.Controllers;
 
 /// <summary>
 /// Catálogo de productos publicados por fruvers
 /// </summary>
+[ApiVersion(1)]
 [ApiController]
-[Route("api/v1/fruver-products")]
+[EnableRateLimiting("GlobalPolicy")]
+[Route("api/v{v:apiVersion}/fruver-products")]
 public class FruverProductsController : ControllerBase
 {
     private readonly ISender _mediator;
@@ -60,19 +64,13 @@ public class FruverProductsController : ControllerBase
     [HttpGet("{id:guid}")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(FruverProductDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetFruverProductById(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetFruverProductByIdQuery(id), cancellationToken);
 
         if (result.IsFailure)
-        {
-            return NotFound(new ErrorResponse(
-                code: result.Error.Code,
-                message: result.Error.Message,
-                traceId: HttpContext.TraceIdentifier,
-                path: HttpContext.Request.Path));
-        }
+            return result.ToProblemDetails();
 
         return Ok(result.Value);
     }
@@ -83,7 +81,7 @@ public class FruverProductsController : ControllerBase
     [HttpGet("catalog/zone/{zoneId:guid}")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(PaginatedList<ZoneCatalogDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCatalogByZone(
         Guid zoneId,
         [FromQuery] Guid? categoryId,
@@ -96,13 +94,7 @@ public class FruverProductsController : ControllerBase
         var result = await _mediator.Send(query, cancellationToken);
 
         if (result.IsFailure)
-        {
-            return NotFound(new ErrorResponse(
-                code: result.Error.Code,
-                message: result.Error.Message,
-                traceId: HttpContext.TraceIdentifier,
-                path: HttpContext.Request.Path));
-        }
+            return result.ToProblemDetails();
 
         return Ok(result.Value);
     }
@@ -113,9 +105,9 @@ public class FruverProductsController : ControllerBase
     [HttpPost]
     [Authorize(Roles = Roles.FruverAliado)]
     [ProducesResponseType(typeof(PublishFruverProductResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> PublishFruverProduct(
         [FromBody] PublishFruverProductRequest request,
         CancellationToken cancellationToken)
@@ -130,20 +122,7 @@ public class FruverProductsController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
-        {
-            var errorResponse = new ErrorResponse(
-                code: result.Error.Code,
-                message: result.Error.Message,
-                traceId: HttpContext.TraceIdentifier,
-                path: HttpContext.Request.Path);
-
-            return result.Error.Code switch
-            {
-                "Product.NotFound" => NotFound(errorResponse),
-                "FruverProduct.AlreadyExists" => Conflict(errorResponse),
-                _ => BadRequest(errorResponse)
-            };
-        }
+            return result.ToProblemDetails();
 
         return CreatedAtAction(
             nameof(GetFruverProductById),
@@ -157,9 +136,9 @@ public class FruverProductsController : ControllerBase
     [HttpPut("{id:guid}")]
     [Authorize(Roles = Roles.FruverAliado)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateFruverProduct(
         Guid id,
         [FromBody] UpdateFruverProductRequest request,
@@ -176,20 +155,7 @@ public class FruverProductsController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
-        {
-            var errorResponse = new ErrorResponse(
-                code: result.Error.Code,
-                message: result.Error.Message,
-                traceId: HttpContext.TraceIdentifier,
-                path: HttpContext.Request.Path);
-
-            return result.Error.Code switch
-            {
-                "FruverProduct.NotFound" => NotFound(errorResponse),
-                "FruverProduct.NotOwner" => Forbid(),
-                _ => BadRequest(errorResponse)
-            };
-        }
+            return result.ToProblemDetails();
 
         return NoContent();
     }
@@ -200,27 +166,14 @@ public class FruverProductsController : ControllerBase
     [HttpDelete("{id:guid}")]
     [Authorize(Roles = Roles.FruverAliado)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UnpublishFruverProduct(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new UnpublishFruverProductCommand(id), cancellationToken);
 
         if (result.IsFailure)
-        {
-            var errorResponse = new ErrorResponse(
-                code: result.Error.Code,
-                message: result.Error.Message,
-                traceId: HttpContext.TraceIdentifier,
-                path: HttpContext.Request.Path);
-
-            return result.Error.Code switch
-            {
-                "FruverProduct.NotFound" => NotFound(errorResponse),
-                "FruverProduct.NotOwner" => Forbid(),
-                _ => BadRequest(errorResponse)
-            };
-        }
+            return result.ToProblemDetails();
 
         return NoContent();
     }
@@ -231,9 +184,9 @@ public class FruverProductsController : ControllerBase
     [HttpPatch("{id:guid}/stock")]
     [Authorize(Roles = Roles.FruverAliado)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateStock(
         Guid id,
         [FromBody] UpdateStockRequest request,
@@ -243,20 +196,7 @@ public class FruverProductsController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
-        {
-            var errorResponse = new ErrorResponse(
-                code: result.Error.Code,
-                message: result.Error.Message,
-                traceId: HttpContext.TraceIdentifier,
-                path: HttpContext.Request.Path);
-
-            return result.Error.Code switch
-            {
-                "FruverProduct.NotFound" => NotFound(errorResponse),
-                "FruverProduct.NotOwner" => Forbid(),
-                _ => BadRequest(errorResponse)
-            };
-        }
+            return result.ToProblemDetails();
 
         return NoContent();
     }

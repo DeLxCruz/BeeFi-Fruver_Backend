@@ -1,5 +1,6 @@
 using API.Contracts.Categories;
-using API.Contracts.Common;
+using API.Extensions;
+using Asp.Versioning;
 using Domain.Constants;
 using Application.Features.Categories.CreateCategory;
 using Application.Features.Categories.DeleteCategory;
@@ -9,14 +10,17 @@ using Application.Features.Categories.UpdateCategory;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace API.Controllers;
 
 /// <summary>
 /// Gestión de categorías de productos
 /// </summary>
+[ApiVersion(1)]
 [ApiController]
-[Route("api/v1/categories")]
+[EnableRateLimiting("GlobalPolicy")]
+[Route("api/v{v:apiVersion}/categories")]
 public class CategoriesController : ControllerBase
 {
     private readonly ISender _mediator;
@@ -46,19 +50,13 @@ public class CategoriesController : ControllerBase
     [HttpGet("{id:guid}")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCategoryById(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetCategoryByIdQuery(id), cancellationToken);
 
         if (result.IsFailure)
-        {
-            return NotFound(new ErrorResponse(
-                code: result.Error.Code,
-                message: result.Error.Message,
-                traceId: HttpContext.TraceIdentifier,
-                path: HttpContext.Request.Path));
-        }
+            return result.ToProblemDetails();
 
         return Ok(result.Value);
     }
@@ -69,9 +67,9 @@ public class CategoriesController : ControllerBase
     [HttpPost]
     [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(typeof(CreateCategoryResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> CreateCategory(
         [FromBody] CreateCategoryRequest request,
         CancellationToken cancellationToken)
@@ -86,20 +84,7 @@ public class CategoriesController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
-        {
-            var errorResponse = new ErrorResponse(
-                code: result.Error.Code,
-                message: result.Error.Message,
-                traceId: HttpContext.TraceIdentifier,
-                path: HttpContext.Request.Path);
-
-            return result.Error.Code switch
-            {
-                "Category.AlreadyExists" => Conflict(errorResponse),
-                "Category.ParentNotFound" => NotFound(errorResponse),
-                _ => BadRequest(errorResponse)
-            };
-        }
+            return result.ToProblemDetails();
 
         return CreatedAtAction(
             nameof(GetCategoryById),
@@ -113,8 +98,8 @@ public class CategoriesController : ControllerBase
     [HttpPut("{id:guid}")]
     [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateCategory(
         Guid id,
         [FromBody] UpdateCategoryRequest request,
@@ -131,17 +116,7 @@ public class CategoriesController : ControllerBase
         var result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
-        {
-            var errorResponse = new ErrorResponse(
-                code: result.Error.Code,
-                message: result.Error.Message,
-                traceId: HttpContext.TraceIdentifier,
-                path: HttpContext.Request.Path);
-
-            return result.Error.Code == "Category.NotFound"
-                ? NotFound(errorResponse)
-                : BadRequest(errorResponse);
-        }
+            return result.ToProblemDetails();
 
         return NoContent();
     }
@@ -152,27 +127,14 @@ public class CategoriesController : ControllerBase
     [HttpDelete("{id:guid}")]
     [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> DeleteCategory(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new DeleteCategoryCommand(id), cancellationToken);
 
         if (result.IsFailure)
-        {
-            var errorResponse = new ErrorResponse(
-                code: result.Error.Code,
-                message: result.Error.Message,
-                traceId: HttpContext.TraceIdentifier,
-                path: HttpContext.Request.Path);
-
-            return result.Error.Code switch
-            {
-                "Category.NotFound" => NotFound(errorResponse),
-                "Category.HasActiveProducts" => Conflict(errorResponse),
-                _ => BadRequest(errorResponse)
-            };
-        }
+            return result.ToProblemDetails();
 
         return NoContent();
     }

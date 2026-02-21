@@ -1,4 +1,6 @@
 using API.Contracts.Addresses;
+using API.Extensions;
+using Asp.Versioning;
 using Application.Features.Addresses.CreateAddress;
 using Application.Features.Addresses.DeleteAddress;
 using Application.Features.Addresses.GetMyAddresses;
@@ -6,14 +8,17 @@ using Application.Features.Addresses.UpdateAddress;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace API.Controllers;
 
 /// <summary>
 /// Controlador para gestión de direcciones de entrega
 /// </summary>
+[ApiVersion(1)]
 [ApiController]
-[Route("api/v1/addresses")]
+[EnableRateLimiting("GlobalPolicy")]
+[Route("api/v{v:apiVersion}/addresses")]
 [Authorize]
 public class AddressesController : ControllerBase
 {
@@ -32,7 +37,7 @@ public class AddressesController : ControllerBase
     public async Task<IActionResult> GetMyAddresses()
     {
         var result = await _mediator.Send(new GetMyAddressesQuery());
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -56,7 +61,7 @@ public class AddressesController : ControllerBase
         var result = await _mediator.Send(command);
         return result.IsSuccess
             ? CreatedAtAction(nameof(GetMyAddresses), new { }, new { id = result.Value })
-            : BadRequest(result.Error);
+            : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -83,9 +88,7 @@ public class AddressesController : ControllerBase
         if (result.IsSuccess)
             return Ok(new { message = "Dirección actualizada" });
 
-        return result.Error.Code == "Address.NotFound"
-            ? NotFound(result.Error)
-            : BadRequest(result.Error);
+        return result.ToProblemDetails();
     }
 
     /// <summary>
@@ -103,8 +106,6 @@ public class AddressesController : ControllerBase
         if (result.IsSuccess)
             return Ok(new { message = "Dirección eliminada" });
 
-        return result.Error.Code == "Address.NotFound"
-            ? NotFound(result.Error)
-            : BadRequest(result.Error);
+        return result.ToProblemDetails();
     }
 }

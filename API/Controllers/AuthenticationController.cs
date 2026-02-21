@@ -1,5 +1,7 @@
 using API.Contracts.Authentication;
 using API.Contracts.Common;
+using API.Extensions;
+using Asp.Versioning;
 using Application.Features.Authentication.Login;
 using Application.Features.Authentication.Logout;
 using Application.Features.Authentication.RefreshToken;
@@ -7,11 +9,14 @@ using Application.Features.Authentication.Register;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace API.Controllers;
 
+[ApiVersion(1)]
 [ApiController]
-[Route("api/[controller]")]
+[EnableRateLimiting("AuthPolicy")]
+[Route("api/v{v:apiVersion}/authentication")]
 public class AuthenticationController : ControllerBase
 {
     private readonly ISender _mediator;
@@ -35,7 +40,7 @@ public class AuthenticationController : ControllerBase
     [HttpPost("register")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
         _logger.LogInformation("Attempting to register user with email: {Email}", request.Email);
@@ -86,7 +91,7 @@ public class AuthenticationController : ControllerBase
     [HttpPost("login")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         _logger.LogInformation("Login attempt for email: {Email}", request.Email);
@@ -135,7 +140,7 @@ public class AuthenticationController : ControllerBase
     [HttpPost("refresh-token")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(RefreshTokenResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
     {
         _logger.LogInformation("Refresh token attempt");
@@ -179,7 +184,7 @@ public class AuthenticationController : ControllerBase
     [HttpPost("logout")]
     [Authorize]
     [ProducesResponseType(typeof(LogoutResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
     {
         _logger.LogInformation(

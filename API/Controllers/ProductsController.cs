@@ -1,5 +1,7 @@
 using API.Contracts.Common;
 using API.Contracts.Products;
+using API.Extensions;
+using Asp.Versioning;
 using Domain.Constants;
 using Application.Common.Models;
 using Application.Features.Products.AddProductImage;
@@ -13,14 +15,17 @@ using Application.Features.Products.UpdateProduct;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace API.Controllers;
 
 /// <summary>
 /// Catálogo base de productos
 /// </summary>
+[ApiVersion(1)]
 [ApiController]
-[Route("api/v1/products")]
+[EnableRateLimiting("GlobalPolicy")]
+[Route("api/v{v:apiVersion}/products")]
 public class ProductsController : ControllerBase
 {
     private readonly ISender _mediator;
@@ -57,7 +62,7 @@ public class ProductsController : ControllerBase
     [HttpGet("{id:guid}")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(ProductDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetProductById(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetProductByIdQuery(id), cancellationToken);
@@ -80,7 +85,7 @@ public class ProductsController : ControllerBase
     [HttpGet("category/{categoryId:guid}")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(PaginatedList<ProductDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetProductsByCategory(
         Guid categoryId,
         [FromQuery] int pageNumber = 1,
@@ -108,9 +113,9 @@ public class ProductsController : ControllerBase
     [HttpPost]
     [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(typeof(CreateProductResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> CreateProduct(
         [FromBody] CreateProductRequest request,
         CancellationToken cancellationToken)
@@ -152,8 +157,8 @@ public class ProductsController : ControllerBase
     [HttpPut("{id:guid}")]
     [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateProduct(
         Guid id,
         [FromBody] UpdateProductRequest request,
@@ -192,8 +197,8 @@ public class ProductsController : ControllerBase
     [HttpDelete("{id:guid}")]
     [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> DeleteProduct(Guid id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new DeleteProductCommand(id), cancellationToken);
@@ -223,8 +228,8 @@ public class ProductsController : ControllerBase
     [HttpPost("{id:guid}/images")]
     [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> AddProductImage(
         Guid id,
         [FromBody] AddProductImageRequest request,
@@ -255,7 +260,7 @@ public class ProductsController : ControllerBase
     [HttpDelete("images/{imageId:guid}")]
     [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteProductImage(Guid imageId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new DeleteProductImageCommand(imageId), cancellationToken);

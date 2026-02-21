@@ -1,4 +1,6 @@
 using API.Contracts.Cart;
+using API.Extensions;
+using Asp.Versioning;
 using Application.Features.Cart.AddToCart;
 using Application.Features.Cart.ClearCart;
 using Application.Features.Cart.GetCart;
@@ -7,14 +9,17 @@ using Application.Features.Cart.UpdateCartItem;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace API.Controllers;
 
 /// <summary>
 /// Controlador para gestión del carrito de compras
 /// </summary>
+[ApiVersion(1)]
 [ApiController]
-[Route("api/v1/cart")]
+[EnableRateLimiting("GlobalPolicy")]
+[Route("api/v{v:apiVersion}/cart")]
 [Authorize]
 public class CartController : ControllerBase
 {
@@ -33,7 +38,7 @@ public class CartController : ControllerBase
     public async Task<IActionResult> GetCart()
     {
         var result = await _mediator.Send(new GetCartQuery());
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result.Value) : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -46,7 +51,7 @@ public class CartController : ControllerBase
     {
         var command = new AddToCartCommand(request.FruverProductId, request.Quantity);
         var result = await _mediator.Send(command);
-        return result.IsSuccess ? Ok(new { message = "Producto agregado al carrito" }) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(new { message = "Producto agregado al carrito" }) : result.ToProblemDetails();
     }
 
     /// <summary>
@@ -64,9 +69,7 @@ public class CartController : ControllerBase
         if (result.IsSuccess)
             return Ok(new { message = "Cantidad actualizada" });
 
-        return result.Error.Code == "Cart.NotFound"
-            ? NotFound(result.Error)
-            : BadRequest(result.Error);
+        return result.ToProblemDetails();
     }
 
     /// <summary>
@@ -83,9 +86,7 @@ public class CartController : ControllerBase
         if (result.IsSuccess)
             return Ok(new { message = "Producto eliminado del carrito" });
 
-        return result.Error.Code == "Cart.NotFound"
-            ? NotFound(result.Error)
-            : BadRequest(result.Error);
+        return result.ToProblemDetails();
     }
 
     /// <summary>
@@ -96,6 +97,6 @@ public class CartController : ControllerBase
     public async Task<IActionResult> ClearCart()
     {
         var result = await _mediator.Send(new ClearCartCommand());
-        return result.IsSuccess ? Ok(new { message = "Carrito vaciado" }) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(new { message = "Carrito vaciado" }) : result.ToProblemDetails();
     }
 }
