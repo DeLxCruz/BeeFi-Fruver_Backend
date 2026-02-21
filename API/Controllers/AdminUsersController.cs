@@ -2,6 +2,7 @@ using Application.Features.Users.ApproveUser;
 using Application.Features.Users.GetPendingUsers;
 using Application.Features.Users.RejectUser;
 using Application.Features.Users.SuspendUser;
+using Domain.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +14,7 @@ namespace API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/admin/users")]
-[Authorize(Roles = "Administrador")]
+[Authorize(Roles = Roles.Administrador)]
 public class AdminUsersController : ControllerBase
 {
     private readonly IMediator _mediator;

@@ -1,5 +1,6 @@
 using API.Contracts.Common;
 using API.Contracts.Zones;
+using Domain.Constants;
 using Application.Features.Zones.AssignFruverToZone;
 using Application.Features.Zones.CreateZone;
 using Application.Features.Zones.GetZoneById;
@@ -91,7 +92,7 @@ public class ZonesController : ControllerBase
     /// Crea una nueva zona
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(typeof(CreateZoneResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
@@ -130,7 +131,7 @@ public class ZonesController : ControllerBase
     /// Actualiza una zona existente
     /// </summary>
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -169,7 +170,7 @@ public class ZonesController : ControllerBase
     /// Asigna un fruver a una zona
     /// </summary>
     [HttpPost("{id:guid}/fruvers")]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -205,7 +206,7 @@ public class ZonesController : ControllerBase
     /// Elimina un fruver de una zona
     /// </summary>
     [HttpDelete("{id:guid}/fruvers/{fruverId:guid}")]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RemoveFruver(

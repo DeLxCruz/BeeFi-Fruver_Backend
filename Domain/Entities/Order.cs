@@ -101,12 +101,20 @@ public class Order : Entity, IAuditableEntity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void Cancel()
+    public void Cancel(string? reason = null)
     {
         if (Status == OrderStatus.Delivered)
             throw new InvalidOperationException("No se puede cancelar un pedido ya entregado");
 
         Status = OrderStatus.Cancelled;
+        if (reason is not null) Notes = reason;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateStatus(OrderStatus newStatus, string? notes = null)
+    {
+        Status = newStatus;
+        if (notes is not null) Notes = notes;
         UpdatedAt = DateTime.UtcNow;
     }
 

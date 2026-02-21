@@ -1,5 +1,6 @@
 using API.Contracts.Categories;
 using API.Contracts.Common;
+using Domain.Constants;
 using Application.Features.Categories.CreateCategory;
 using Application.Features.Categories.DeleteCategory;
 using Application.Features.Categories.GetCategories;
@@ -66,7 +67,7 @@ public class CategoriesController : ControllerBase
     /// Crea una nueva categoría
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(typeof(CreateCategoryResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -110,7 +111,7 @@ public class CategoriesController : ControllerBase
     /// Actualiza una categoría existente
     /// </summary>
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -149,7 +150,7 @@ public class CategoriesController : ControllerBase
     /// Desactiva (elimina lógicamente) una categoría
     /// </summary>
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]

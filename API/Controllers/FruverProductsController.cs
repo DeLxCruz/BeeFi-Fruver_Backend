@@ -1,5 +1,6 @@
 using API.Contracts.Common;
 using API.Contracts.FruverProducts;
+using Domain.Constants;
 using Application.Common.Models;
 using Application.Features.FruverProducts.GetCatalogByZone;
 using Application.Features.FruverProducts.GetFruverProductById;
@@ -110,7 +111,7 @@ public class FruverProductsController : ControllerBase
     /// El fruver publica un producto del catálogo base
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "FruverAliado")]
+    [Authorize(Roles = Roles.FruverAliado)]
     [ProducesResponseType(typeof(PublishFruverProductResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -154,7 +155,7 @@ public class FruverProductsController : ControllerBase
     /// El fruver actualiza precio/stock/descuentos de su producto publicado
     /// </summary>
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = "FruverAliado")]
+    [Authorize(Roles = Roles.FruverAliado)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
@@ -197,7 +198,7 @@ public class FruverProductsController : ControllerBase
     /// El fruver despublica su producto (soft unpublish)
     /// </summary>
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = "FruverAliado")]
+    [Authorize(Roles = Roles.FruverAliado)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -228,7 +229,7 @@ public class FruverProductsController : ControllerBase
     /// Actualización rápida de stock
     /// </summary>
     [HttpPatch("{id:guid}/stock")]
-    [Authorize(Roles = "FruverAliado")]
+    [Authorize(Roles = Roles.FruverAliado)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]

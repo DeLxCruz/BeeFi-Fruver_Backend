@@ -1,5 +1,6 @@
 using API.Contracts.Common;
 using API.Contracts.Products;
+using Domain.Constants;
 using Application.Common.Models;
 using Application.Features.Products.AddProductImage;
 using Application.Features.Products.CreateProduct;
@@ -105,7 +106,7 @@ public class ProductsController : ControllerBase
     /// Crea un nuevo producto en el catálogo base
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(typeof(CreateProductResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -149,7 +150,7 @@ public class ProductsController : ControllerBase
     /// Actualiza un producto existente
     /// </summary>
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -189,7 +190,7 @@ public class ProductsController : ControllerBase
     /// Desactiva un producto (soft delete)
     /// </summary>
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
@@ -220,7 +221,7 @@ public class ProductsController : ControllerBase
     /// Agrega una imagen a un producto
     /// </summary>
     [HttpPost("{id:guid}/images")]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -252,7 +253,7 @@ public class ProductsController : ControllerBase
     /// Elimina una imagen de producto
     /// </summary>
     [HttpDelete("images/{imageId:guid}")]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = Roles.Administrador)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteProductImage(Guid imageId, CancellationToken cancellationToken)

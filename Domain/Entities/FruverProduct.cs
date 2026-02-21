@@ -82,6 +82,12 @@ public class FruverProduct : Entity, IAuditableEntity
         UpdatedAt = DateTime.UtcNow;
     }
 
+    public void RestoreStock(int quantity)
+    {
+        Stock += quantity;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
     public void SetDiscount(decimal? discountPercentage)
     {
         DiscountPercentage = discountPercentage;
