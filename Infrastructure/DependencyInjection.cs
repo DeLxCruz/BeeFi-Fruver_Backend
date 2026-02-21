@@ -106,6 +106,11 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         // ========================================
+        // 💳 PAYMENT GATEWAY
+        // ========================================
+        services.AddScoped<IPaymentGateway, MockPaymentGateway>();
+
+        // ========================================
         // 🌐 BEEFI API CLIENT
         // ========================================
         services.Configure<BeeFiApiSettings>(configuration.GetSection(BeeFiApiSettings.SectionName));

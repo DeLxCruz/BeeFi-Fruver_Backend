@@ -70,4 +70,11 @@ public class Delivery : Entity
     {
         EstimatedDeliveryTime = estimatedTime;
     }
+
+    public void UpdateStatus(DeliveryStatus newStatus, string? trackingNotes = null)
+    {
+        Status = newStatus;
+        if (trackingNotes is not null) TrackingNotes = trackingNotes;
+        if (newStatus == DeliveryStatus.Delivered) ActualDeliveryTime = DateTime.UtcNow;
+    }
 }
