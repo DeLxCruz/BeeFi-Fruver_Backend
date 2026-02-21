@@ -46,6 +46,21 @@ public class FruverProduct : Entity, IAuditableEntity
         };
     }
 
+    public void Update(
+        decimal price,
+        int stock,
+        decimal? discountPercentage,
+        decimal? beeFiExclusiveDiscount,
+        bool isAvailable)
+    {
+        Price = price;
+        Stock = stock;
+        DiscountPercentage = discountPercentage;
+        BeeFiExclusiveDiscount = beeFiExclusiveDiscount;
+        IsAvailable = isAvailable;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
     public void UpdatePrice(decimal price)
     {
         Price = price;

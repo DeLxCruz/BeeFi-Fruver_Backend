@@ -45,11 +45,17 @@ public class Product : Entity, IAuditableEntity
         };
     }
 
-    public void Update(string name, string description, Guid categoryId, string unitOfMeasure)
+    public void Update(
+        string name,
+        string description,
+        Guid categoryId,
+        string mainImageUrl,
+        string unitOfMeasure)
     {
         Name = name;
         Description = description;
         CategoryId = categoryId;
+        MainImageUrl = mainImageUrl;
         UnitOfMeasure = unitOfMeasure;
         UpdatedAt = DateTime.UtcNow;
     }
