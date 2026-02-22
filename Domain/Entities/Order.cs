@@ -21,6 +21,14 @@ public class Order : Entity, IAuditableEntity
 
     public string? Notes { get; private set; }
 
+    // Comisión
+    public decimal CommissionAmount { get; private set; }
+    public Guid? CommissionRuleId { get; private set; }
+    public string? CommissionRuleName { get; private set; }
+
+    // Modalidad de transporte
+    public DeliveryMode DeliveryMode { get; private set; }
+
     // IAuditableEntity
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
@@ -67,8 +75,24 @@ public class Order : Entity, IAuditableEntity
             PaymentMethod = paymentMethod,
             PaymentStatus = PaymentStatus.Pending,
             Notes = notes,
+            CommissionAmount = 0m,
+            DeliveryMode = DeliveryMode.BeeFiLogistics,
             CreatedAt = DateTime.UtcNow
         };
+    }
+
+    public void SetCommission(decimal amount, Guid? ruleId, string? ruleName)
+    {
+        CommissionAmount = amount;
+        CommissionRuleId = ruleId;
+        CommissionRuleName = ruleName;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdatePaymentStatus(PaymentStatus status)
+    {
+        PaymentStatus = status;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void Confirm()
@@ -115,12 +139,6 @@ public class Order : Entity, IAuditableEntity
     {
         Status = newStatus;
         if (notes is not null) Notes = notes;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void UpdatePaymentStatus(PaymentStatus status)
-    {
-        PaymentStatus = status;
         UpdatedAt = DateTime.UtcNow;
     }
 

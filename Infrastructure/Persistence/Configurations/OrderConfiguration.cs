@@ -54,6 +54,18 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.Notes)
             .HasMaxLength(1000);
 
+        builder.Property(o => o.CommissionAmount)
+            .IsRequired()
+            .HasPrecision(18, 4)
+            .HasDefaultValue(0m);
+
+        builder.Property(o => o.CommissionRuleName)
+            .HasMaxLength(200);
+
+        builder.Property(o => o.DeliveryMode)
+            .IsRequired()
+            .HasConversion<string>();
+
         builder.Property(o => o.CreatedAt)
             .IsRequired();
 

@@ -65,6 +65,19 @@ public interface IApplicationDbContext
     // Delivery Assignment
     DbSet<DeliveryPersonZone> DeliveryPersonZones { get; }
 
+    // Comisiones
+    DbSet<CommissionRule> CommissionRules { get; }
+
+    // Variantes de producto
+    DbSet<ProductVariant> ProductVariants { get; }
+
+    // Devoluciones
+    DbSet<ReturnRequest> ReturnRequests { get; }
+
+    // Precio de referencia (Anexo A1)
+    DbSet<PriceReference> PriceReferences { get; }
+    DbSet<SalesAggDaily> SalesAggDaily { get; }
+
     // Método para guardar cambios
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 

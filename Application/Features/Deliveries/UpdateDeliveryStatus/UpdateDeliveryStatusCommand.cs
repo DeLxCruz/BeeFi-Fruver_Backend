@@ -9,4 +9,6 @@ public record UpdateDeliveryStatusCommand(
     DeliveryStatus NewStatus,
     double? Latitude = null,
     double? Longitude = null,
-    string? Notes = null) : IRequest<Result>;
+    string? Notes = null,
+    string? DeliveryProofUrl = null,
+    string? DeliveryPin = null) : IRequest<Result>;

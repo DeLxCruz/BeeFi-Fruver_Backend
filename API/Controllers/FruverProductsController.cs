@@ -6,6 +6,9 @@ using Application.Common.Models;
 using Application.Features.FruverProducts.GetCatalogByZone;
 using Application.Features.FruverProducts.GetFruverProductById;
 using Application.Features.FruverProducts.GetFruverProducts;
+using Application.Features.FruverProducts.AddVariant;
+using Application.Features.FruverProducts.DeleteVariant;
+using Application.Features.FruverProducts.UpdateVariant;
 using Application.Features.FruverProducts.PublishFruverProduct;
 using Application.Features.FruverProducts.UnpublishFruverProduct;
 using Application.Features.FruverProducts.UpdateFruverProduct;
@@ -63,7 +66,7 @@ public class FruverProductsController : ControllerBase
     /// </summary>
     [HttpGet("{id:guid}")]
     [AllowAnonymous]
-    [ProducesResponseType(typeof(FruverProductDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(FruverProductDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetFruverProductById(Guid id, CancellationToken cancellationToken)
     {
@@ -194,6 +197,80 @@ public class FruverProductsController : ControllerBase
     {
         var command = new UpdateStockCommand(id, request.NewStock);
         var result = await _mediator.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+            return result.ToProblemDetails();
+
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Añade una variante (tamaño, peso, presentación) a un producto publicado
+    /// </summary>
+    [HttpPost("{id:guid}/variants")]
+    [Authorize(Roles = Roles.FruverAliado)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AddVariant(
+        Guid id,
+        [FromBody] AddVariantRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new AddVariantCommand(
+            id, request.Name, request.PriceAdjustment, request.Stock,
+            request.DisplayOrder, request.SKU);
+
+        var result = await _mediator.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+            return result.ToProblemDetails();
+
+        return CreatedAtAction(nameof(GetFruverProductById), new { id }, new { variantId = result.Value });
+    }
+
+    /// <summary>
+    /// Actualiza una variante de un producto publicado
+    /// </summary>
+    [HttpPut("{id:guid}/variants/{variantId:guid}")]
+    [Authorize(Roles = Roles.FruverAliado)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateVariant(
+        Guid id,
+        Guid variantId,
+        [FromBody] UpdateVariantRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new UpdateVariantCommand(
+            variantId, request.Name, request.PriceAdjustment, request.Stock,
+            request.IsActive, request.DisplayOrder, request.SKU);
+
+        var result = await _mediator.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+            return result.ToProblemDetails();
+
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Desactiva (elimina lógicamente) una variante
+    /// </summary>
+    [HttpDelete("{id:guid}/variants/{variantId:guid}")]
+    [Authorize(Roles = Roles.FruverAliado)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteVariant(
+        Guid id,
+        Guid variantId,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new DeleteVariantCommand(variantId), cancellationToken);
 
         if (result.IsFailure)
             return result.ToProblemDetails();

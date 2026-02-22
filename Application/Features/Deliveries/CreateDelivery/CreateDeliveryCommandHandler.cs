@@ -40,7 +40,12 @@ public class CreateDeliveryCommandHandler : IRequestHandler<CreateDeliveryComman
         if (existingDelivery)
             return Result.Failure<Guid>(DeliveryErrors.OrderAlreadyHasDelivery);
 
-        var delivery = Delivery.Create(request.OrderId, request.EstimatedDeliveryTime);
+        var delivery = Delivery.Create(
+            request.OrderId,
+            request.DeliveryMode,
+            request.EstimatedDeliveryTime,
+            request.SellerDeliveryFee,
+            request.SellerDeliveryPersonName);
         _context.Deliveries.Add(delivery);
 
         var history = DeliveryStatusHistory.Create(

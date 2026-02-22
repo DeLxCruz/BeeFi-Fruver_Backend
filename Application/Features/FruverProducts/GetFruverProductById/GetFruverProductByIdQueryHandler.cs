@@ -1,5 +1,4 @@
 using Application.Common.Interfaces;
-using Application.Features.FruverProducts.GetFruverProducts;
 using Domain.Errors;
 using Domain.Primitives;
 using MediatR;
@@ -8,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Application.Features.FruverProducts.GetFruverProductById;
 
 public class GetFruverProductByIdQueryHandler
-    : IRequestHandler<GetFruverProductByIdQuery, Result<FruverProductDto>>
+    : IRequestHandler<GetFruverProductByIdQuery, Result<FruverProductDetailDto>>
 {
     private readonly IApplicationDbContext _context;
 
@@ -17,14 +16,15 @@ public class GetFruverProductByIdQueryHandler
         _context = context;
     }
 
-    public async Task<Result<FruverProductDto>> Handle(
+    public async Task<Result<FruverProductDetailDto>> Handle(
         GetFruverProductByIdQuery request,
         CancellationToken cancellationToken)
     {
         var item = await _context.FruverProducts
             .AsNoTracking()
+            .Include(fp => fp.Variants.Where(v => v.IsActive).OrderBy(v => v.DisplayOrder))
             .Where(fp => fp.Id == request.FruverProductId)
-            .Select(fp => new FruverProductDto(
+            .Select(fp => new FruverProductDetailDto(
                 fp.Id,
                 fp.ProductId,
                 fp.Product.Name,
@@ -41,11 +41,24 @@ public class GetFruverProductByIdQueryHandler
                 fp.Price
                     * (1m - (fp.DiscountPercentage ?? 0m) / 100m)
                     * (1m - (fp.BeeFiExclusiveDiscount ?? 0m) / 100m),
-                fp.Product.UnitOfMeasure))
+                fp.Product.UnitOfMeasure,
+                fp.PreparationTimeMinutes,
+                fp.IsSeasonal,
+                fp.AvailableFrom,
+                fp.AvailableUntil,
+                fp.AllowPreOrder,
+                fp.PreOrderAvailableDate,
+                fp.Variants
+                    .Where(v => v.IsActive)
+                    .OrderBy(v => v.DisplayOrder)
+                    .Select(v => new ProductVariantDto(
+                        v.Id, v.Name, v.SKU, v.PriceAdjustment,
+                        v.Stock, v.IsActive, v.DisplayOrder))
+                    .ToList()))
             .FirstOrDefaultAsync(cancellationToken);
 
         if (item is null)
-            return Result.Failure<FruverProductDto>(FruverProductErrors.NotFound);
+            return Result.Failure<FruverProductDetailDto>(FruverProductErrors.NotFound);
 
         return Result.Success(item);
     }

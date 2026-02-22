@@ -50,7 +50,12 @@ public class UpdateDeliveryStatusCommandHandler : IRequestHandler<UpdateDelivery
             !allowed.Contains(request.NewStatus))
             return Result.Failure(DeliveryErrors.InvalidTransition);
 
-        delivery.UpdateStatus(request.NewStatus, request.Notes);
+        if (request.NewStatus == DeliveryStatus.Delivered &&
+            string.IsNullOrWhiteSpace(request.DeliveryProofUrl) &&
+            string.IsNullOrWhiteSpace(request.DeliveryPin))
+            return Result.Failure(DeliveryErrors.ProofRequired);
+
+        delivery.UpdateStatus(request.NewStatus, request.Notes, request.DeliveryProofUrl, request.DeliveryPin);
 
         var history = DeliveryStatusHistory.Create(
             deliveryId: delivery.Id,

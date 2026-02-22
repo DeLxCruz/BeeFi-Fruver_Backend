@@ -42,4 +42,7 @@ public static class DeliveryErrors
 
     public static readonly Error OrderNotEligible =
         new("Delivery.OrderNotEligible", "El pedido no está en un estado válido para crear una entrega");
+
+    public static readonly Error ProofRequired =
+        new("Delivery.ProofRequired", "Se requiere URL de prueba de entrega o PIN para marcar como entregado");
 }

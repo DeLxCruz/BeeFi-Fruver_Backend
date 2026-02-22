@@ -19,6 +19,23 @@ public class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
         builder.Property(d => d.TrackingNotes)
             .HasMaxLength(1000);
 
+        builder.Property(d => d.DeliveryMode)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasDefaultValue(Domain.Enums.DeliveryMode.BeeFiLogistics);
+
+        builder.Property(d => d.SellerDeliveryFee)
+            .HasPrecision(18, 2);
+
+        builder.Property(d => d.DeliveryProofUrl)
+            .HasMaxLength(500);
+
+        builder.Property(d => d.DeliveryPin)
+            .HasMaxLength(10);
+
+        builder.Property(d => d.SellerDeliveryPersonName)
+            .HasMaxLength(200);
+
         builder.Property(d => d.CreatedAt)
             .IsRequired();
 

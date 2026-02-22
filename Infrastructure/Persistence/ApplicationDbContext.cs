@@ -68,6 +68,19 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     // Delivery Assignment
     public DbSet<DeliveryPersonZone> DeliveryPersonZones => Set<DeliveryPersonZone>();
 
+    // Comisiones
+    public DbSet<CommissionRule> CommissionRules => Set<CommissionRule>();
+
+    // Variantes de producto
+    public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
+
+    // Devoluciones
+    public DbSet<ReturnRequest> ReturnRequests => Set<ReturnRequest>();
+
+    // Precio de referencia (Anexo A1)
+    public DbSet<PriceReference> PriceReferences => Set<PriceReference>();
+    public DbSet<SalesAggDaily> SalesAggDaily => Set<SalesAggDaily>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Aplicar todas las configuraciones del assembly

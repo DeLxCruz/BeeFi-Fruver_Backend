@@ -122,6 +122,11 @@ public static class DependencyInjection
         services.AddScoped<ICacheService, MemoryCacheService>();
 
         // ========================================
+        // 📊 PRICE REFERENCE SERVICE
+        // ========================================
+        services.AddScoped<IPriceReferenceService, PriceReferenceService>();
+
+        // ========================================
         // 🌐 BEEFI API CLIENT
         // ========================================
         services.Configure<BeeFiApiSettings>(configuration.GetSection(BeeFiApiSettings.SectionName));

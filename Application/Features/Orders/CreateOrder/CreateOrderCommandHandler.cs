@@ -2,6 +2,7 @@ using Application.Common.Interfaces;
 using Domain.Entities;
 using Domain.Errors;
 using Domain.Primitives;
+using Domain.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -70,6 +71,23 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
         var deliveryFee = address.Zone.DeliveryBaseCost;
         var orderNumber = $"BF-{DateTime.UtcNow:yyyyMMdd}-{Random.Shared.Next(1000, 9999):D4}";
 
+        // PASO B2: Calcular comisión
+        var userRoles = await _context.UserRoles
+            .Where(ur => ur.UserId == userId)
+            .Select(ur => ur.RoleId)
+            .ToListAsync(cancellationToken);
+
+        var firstRoleId = userRoles.FirstOrDefault();
+        var zoneId = address.ZoneId;
+        var categoryId = cartItems.First().FruverProduct.Product.CategoryId;
+
+        var commissionRules = await _context.CommissionRules
+            .Where(cr => cr.IsActive)
+            .ToListAsync(cancellationToken);
+
+        var commissionResult = CommissionCalculator.Calculate(
+            commissionRules, firstRoleId, zoneId, categoryId, Math.Round(subtotal, 2));
+
         // Create order
         var order = Order.Create(
             orderNumber,
@@ -83,6 +101,11 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Res
             request.Notes);
 
         _context.Orders.Add(order);
+
+        order.SetCommission(
+            commissionResult.CommissionAmount,
+            commissionResult.RuleId,
+            commissionResult.RuleApplied);
 
         // Create order items and reduce stock
         foreach (var item in cartItems)

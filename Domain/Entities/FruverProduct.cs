@@ -13,6 +13,14 @@ public class FruverProduct : Entity, IAuditableEntity
     public decimal? BeeFiExclusiveDiscount { get; private set; }
     public bool IsFeatured { get; private set; }
 
+    // PASO 6: campos adicionales
+    public int PreparationTimeMinutes { get; private set; } = 30;
+    public bool IsSeasonal { get; private set; }
+    public DateTime? AvailableFrom { get; private set; }
+    public DateTime? AvailableUntil { get; private set; }
+    public bool AllowPreOrder { get; private set; }
+    public DateTime? PreOrderAvailableDate { get; private set; }
+
     // IAuditableEntity
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
@@ -23,6 +31,7 @@ public class FruverProduct : Entity, IAuditableEntity
     public virtual User Fruver { get; set; } = null!;
     public virtual Product Product { get; set; } = null!;
     public virtual ICollection<OrderItem> OrderItems { get; private set; } = new List<OrderItem>();
+    public virtual ICollection<ProductVariant> Variants { get; private set; } = new List<ProductVariant>();
 
     private FruverProduct() { }
 
@@ -42,6 +51,9 @@ public class FruverProduct : Entity, IAuditableEntity
             Stock = stock,
             IsAvailable = true,
             IsFeatured = false,
+            PreparationTimeMinutes = 30,
+            IsSeasonal = false,
+            AllowPreOrder = false,
             CreatedAt = DateTime.UtcNow
         };
     }
@@ -51,13 +63,25 @@ public class FruverProduct : Entity, IAuditableEntity
         int stock,
         decimal? discountPercentage,
         decimal? beeFiExclusiveDiscount,
-        bool isAvailable)
+        bool isAvailable,
+        int preparationTimeMinutes = 30,
+        bool isSeasonal = false,
+        DateTime? availableFrom = null,
+        DateTime? availableUntil = null,
+        bool allowPreOrder = false,
+        DateTime? preOrderAvailableDate = null)
     {
         Price = price;
         Stock = stock;
         DiscountPercentage = discountPercentage;
         BeeFiExclusiveDiscount = beeFiExclusiveDiscount;
         IsAvailable = isAvailable;
+        PreparationTimeMinutes = preparationTimeMinutes;
+        IsSeasonal = isSeasonal;
+        AvailableFrom = availableFrom;
+        AvailableUntil = availableUntil;
+        AllowPreOrder = allowPreOrder;
+        PreOrderAvailableDate = preOrderAvailableDate;
         UpdatedAt = DateTime.UtcNow;
     }
 

@@ -33,6 +33,19 @@ public class FruverProductConfiguration : IEntityTypeConfiguration<FruverProduct
             .IsRequired()
             .HasDefaultValue(false);
 
+        // PASO 6: campos adicionales
+        builder.Property(fp => fp.PreparationTimeMinutes)
+            .IsRequired()
+            .HasDefaultValue(30);
+
+        builder.Property(fp => fp.IsSeasonal)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(fp => fp.AllowPreOrder)
+            .IsRequired()
+            .HasDefaultValue(false);
+
         builder.Property(fp => fp.CreatedAt)
             .IsRequired();
 

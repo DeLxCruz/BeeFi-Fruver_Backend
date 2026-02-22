@@ -320,9 +320,9 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("3ddfad6c-fa4f-49ed-a33f-4a294d555c03"),
+                            Id = new Guid("74017c8d-1b0a-449f-9b58-04325e5a4462"),
                             BonusPointsMultiplier = 1,
-                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 979, DateTimeKind.Utc).AddTicks(4652),
+                            CreatedAt = new DateTime(2026, 2, 22, 0, 39, 37, 150, DateTimeKind.Utc).AddTicks(3354),
                             Description = "Plan básico de internet con beneficios en BeeFi",
                             DiscountPercentage = 5m,
                             FreeDeliveriesPerMonth = 1,
@@ -336,9 +336,9 @@ namespace Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("ddccdbc7-ba86-4789-bd38-3f5fc33090d5"),
+                            Id = new Guid("cd10c437-a131-497f-95b8-b067b05fdc57"),
                             BonusPointsMultiplier = 2,
-                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 979, DateTimeKind.Utc).AddTicks(4655),
+                            CreatedAt = new DateTime(2026, 2, 22, 0, 39, 37, 150, DateTimeKind.Utc).AddTicks(3358),
                             Description = "Plan plus con más beneficios",
                             DiscountPercentage = 10m,
                             FreeDeliveriesPerMonth = 3,
@@ -352,9 +352,9 @@ namespace Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("b58b466d-64af-488f-b74c-90ddbd4825ad"),
+                            Id = new Guid("a4a13f0d-5e58-4648-9d93-b43f924e8c1b"),
                             BonusPointsMultiplier = 3,
-                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 979, DateTimeKind.Utc).AddTicks(4656),
+                            CreatedAt = new DateTime(2026, 2, 22, 0, 39, 37, 150, DateTimeKind.Utc).AddTicks(3358),
                             Description = "Plan premium con todos los beneficios",
                             DiscountPercentage = 15m,
                             FreeDeliveriesPerMonth = 5,
@@ -516,8 +516,8 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("d4f7e198-5a6a-4ae4-a6a9-fa3a3b33acf5"),
-                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 981, DateTimeKind.Utc).AddTicks(5005),
+                            Id = new Guid("67099ccd-7593-4cb3-9c80-672c8735d609"),
+                            CreatedAt = new DateTime(2026, 2, 22, 0, 39, 37, 152, DateTimeKind.Utc).AddTicks(6121),
                             Description = "Frutas frescas",
                             DisplayOrder = 1,
                             IconUrl = "/icons/fruits.png",
@@ -526,8 +526,8 @@ namespace Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("fe31a0fe-2b4a-4157-a209-1a193f64eb52"),
-                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 981, DateTimeKind.Utc).AddTicks(5008),
+                            Id = new Guid("d10ec7f6-95e8-4d3d-88b7-00f344e7378f"),
+                            CreatedAt = new DateTime(2026, 2, 22, 0, 39, 37, 152, DateTimeKind.Utc).AddTicks(6124),
                             Description = "Verduras frescas",
                             DisplayOrder = 2,
                             IconUrl = "/icons/vegetables.png",
@@ -536,8 +536,8 @@ namespace Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("8d0d4260-3c22-4a82-9f3b-784cfa790654"),
-                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 981, DateTimeKind.Utc).AddTicks(5009),
+                            Id = new Guid("681453cb-dae1-4fde-a25f-8203c2ca2615"),
+                            CreatedAt = new DateTime(2026, 2, 22, 0, 39, 37, 152, DateTimeKind.Utc).AddTicks(6124),
                             Description = "Productos lácteos",
                             DisplayOrder = 3,
                             IconUrl = "/icons/dairy.png",
@@ -546,14 +546,93 @@ namespace Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("f25d815f-2594-4e30-8a2f-6176fdc2c994"),
-                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 981, DateTimeKind.Utc).AddTicks(5010),
+                            Id = new Guid("be63aaa5-b9c7-46a9-83f5-2231a3e7bb1d"),
+                            CreatedAt = new DateTime(2026, 2, 22, 0, 39, 37, 152, DateTimeKind.Utc).AddTicks(6125),
                             Description = "Carnes y embutidos",
                             DisplayOrder = 4,
                             IconUrl = "/icons/meat.png",
                             IsActive = true,
                             Name = "Carnes"
                         });
+                });
+
+            modelBuilder.Entity("Domain.Entities.CommissionRule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CommissionType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("CommissionValue")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<decimal?>("MaxCommission")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<decimal?>("MaxOrderAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("MinCommission")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<decimal?>("MinOrderAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Priority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<Guid?>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ValidFrom")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ValidTo")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ZoneId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("ZoneId");
+
+                    b.HasIndex("IsActive", "ValidFrom", "ValidTo");
+
+                    b.ToTable("CommissionRules", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Delivery", b =>
@@ -568,14 +647,36 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DeliveryMode")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("BeeFiLogistics");
+
                     b.Property<Guid?>("DeliveryPersonId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DeliveryPin")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("DeliveryProofUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime?>("EstimatedDeliveryTime")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("SellerDeliveryFee")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("SellerDeliveryPersonName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -712,6 +813,17 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("AllowPreOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("AvailableFrom")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("AvailableUntil")
+                        .HasColumnType("datetime2");
+
                     b.Property<decimal?>("BeeFiExclusiveDiscount")
                         .HasPrecision(5, 2)
                         .HasColumnType("decimal(5,2)");
@@ -738,6 +850,19 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
+
+                    b.Property<bool>("IsSeasonal")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("PreOrderAvailableDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PreparationTimeMinutes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(30);
 
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
@@ -890,6 +1015,19 @@ namespace Infrastructure.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal>("CommissionAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<Guid?>("CommissionRuleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CommissionRuleName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -899,6 +1037,10 @@ namespace Infrastructure.Migrations
                     b.Property<decimal>("DeliveryFee")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("DeliveryMode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Discount")
                         .HasPrecision(18, 2)
@@ -1100,6 +1242,60 @@ namespace Infrastructure.Migrations
                     b.ToTable("PointsTransactions", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Entities.PriceReference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ComputedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("P25")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<decimal>("P50")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<decimal>("P75")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<string>("ProductKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("SampleCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UnitNorm")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("WindowDays")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ZoneId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductKey");
+
+                    b.HasIndex("ProductKey", "ZoneId")
+                        .IsUnique()
+                        .HasFilter("[ZoneId] IS NOT NULL");
+
+                    b.ToTable("PriceReferences", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Entities.Product", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1181,6 +1377,52 @@ namespace Infrastructure.Migrations
                     b.ToTable("ProductImages");
                 });
 
+            modelBuilder.Entity("Domain.Entities.ProductVariant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DisplayOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<Guid>("FruverProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("PriceAdjustment")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<string>("SKU")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("Stock")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SKU")
+                        .IsUnique()
+                        .HasFilter("[SKU] IS NOT NULL");
+
+                    b.HasIndex("FruverProductId", "IsActive");
+
+                    b.ToTable("ProductVariants", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1229,6 +1471,71 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UserId", "IsRevoked", "ExpiresAt");
 
                     b.ToTable("RefreshTokens", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.ReturnRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AdminNotes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EvidenceUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<decimal?>("RefundAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("RefundType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ReviewedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId", "Status");
+
+                    b.ToTable("ReturnRequests", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Review", b =>
@@ -1378,31 +1685,72 @@ namespace Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("e93bd156-71f2-4d7e-836b-224752e64a66"),
-                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 997, DateTimeKind.Utc).AddTicks(3365),
+                            CreatedAt = new DateTime(2026, 2, 21, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Usuario final que compra productos",
                             Name = "Cliente"
                         },
                         new
                         {
-                            Id = new Guid("24af6f6c-1269-449b-9b63-fd6d1e49433a"),
-                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 997, DateTimeKind.Utc).AddTicks(3371),
-                            Description = "Vendedor que publica y gestiona productos",
-                            Name = "FruverAliado"
-                        },
-                        new
-                        {
                             Id = new Guid("a45227e0-cb30-4924-9338-2ad0de80661c"),
-                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 997, DateTimeKind.Utc).AddTicks(3372),
+                            CreatedAt = new DateTime(2026, 2, 21, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Personal de entregas y logística",
                             Name = "Empleado"
                         },
                         new
                         {
-                            Id = new Guid("22a05b31-2317-4716-8b9e-d7fdcd642ea9"),
-                            CreatedAt = new DateTime(2026, 2, 21, 20, 11, 27, 997, DateTimeKind.Utc).AddTicks(3373),
+                            Id = new Guid("a20b5b31-2317-4716-8b9e-d7fdcd642ea9"),
+                            CreatedAt = new DateTime(2026, 2, 21, 0, 0, 0, 0, DateTimeKind.Utc),
                             Description = "Gestión completa del sistema",
                             Name = "Administrador"
+                        },
+                        new
+                        {
+                            Id = new Guid("24af6f6c-1269-449b-9b63-fd6d1e49433a"),
+                            CreatedAt = new DateTime(2026, 2, 21, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Vendedor que publica y gestiona productos",
+                            Name = "FruverAliado"
                         });
+                });
+
+            modelBuilder.Entity("Domain.Entities.SalesAggDaily", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("OrderCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<decimal>("Revenue")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("UnitsSold")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ZoneId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductKey", "ZoneId");
+
+                    b.HasIndex("ProductKey", "Date", "ZoneId")
+                        .IsUnique()
+                        .HasFilter("[ZoneId] IS NOT NULL");
+
+                    b.ToTable("SalesAggDaily", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -1709,6 +2057,30 @@ namespace Infrastructure.Migrations
                     b.Navigation("ParentCategory");
                 });
 
+            modelBuilder.Entity("Domain.Entities.CommissionRule", b =>
+                {
+                    b.HasOne("Domain.Entities.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Domain.Entities.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Domain.Entities.Zone", "Zone")
+                        .WithMany()
+                        .HasForeignKey("ZoneId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Role");
+
+                    b.Navigation("Zone");
+                });
+
             modelBuilder.Entity("Domain.Entities.Delivery", b =>
                 {
                     b.HasOne("Domain.Entities.User", "DeliveryPerson")
@@ -1938,6 +2310,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Domain.Entities.ProductVariant", b =>
+                {
+                    b.HasOne("Domain.Entities.FruverProduct", "FruverProduct")
+                        .WithMany("Variants")
+                        .HasForeignKey("FruverProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FruverProduct");
+                });
+
             modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("Domain.Entities.User", "User")
@@ -1945,6 +2328,25 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ReturnRequest", b =>
+                {
+                    b.HasOne("Domain.Entities.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
 
                     b.Navigation("User");
                 });
@@ -2053,6 +2455,8 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.FruverProduct", b =>
                 {
                     b.Navigation("OrderItems");
+
+                    b.Navigation("Variants");
                 });
 
             modelBuilder.Entity("Domain.Entities.LoyaltyPoints", b =>

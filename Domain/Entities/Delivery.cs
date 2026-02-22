@@ -13,6 +13,13 @@ public class Delivery : Entity
     public string? TrackingNotes { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
+    // Modalidad dual de transporte
+    public DeliveryMode DeliveryMode { get; private set; }
+    public decimal? SellerDeliveryFee { get; private set; }
+    public string? DeliveryProofUrl { get; private set; }
+    public string? DeliveryPin { get; private set; }
+    public string? SellerDeliveryPersonName { get; private set; }
+
     // Navigation properties
     public virtual Order Order { get; set; } = null!;
     public virtual User? DeliveryPerson { get; set; }
@@ -22,13 +29,21 @@ public class Delivery : Entity
 
     private Delivery(Guid id) : base(id) { }
 
-    public static Delivery Create(Guid orderId, DateTime? estimatedDeliveryTime = null)
+    public static Delivery Create(
+        Guid orderId,
+        DeliveryMode deliveryMode = DeliveryMode.BeeFiLogistics,
+        DateTime? estimatedDeliveryTime = null,
+        decimal? sellerDeliveryFee = null,
+        string? sellerDeliveryPersonName = null)
     {
         return new Delivery(Guid.NewGuid())
         {
             OrderId = orderId,
             Status = DeliveryStatus.Pending,
             EstimatedDeliveryTime = estimatedDeliveryTime,
+            DeliveryMode = deliveryMode,
+            SellerDeliveryFee = sellerDeliveryFee,
+            SellerDeliveryPersonName = sellerDeliveryPersonName,
             CreatedAt = DateTime.UtcNow
         };
     }
@@ -71,10 +86,12 @@ public class Delivery : Entity
         EstimatedDeliveryTime = estimatedTime;
     }
 
-    public void UpdateStatus(DeliveryStatus newStatus, string? trackingNotes = null)
+    public void UpdateStatus(DeliveryStatus newStatus, string? trackingNotes = null, string? proofUrl = null, string? pin = null)
     {
         Status = newStatus;
         if (trackingNotes is not null) TrackingNotes = trackingNotes;
+        if (proofUrl is not null) DeliveryProofUrl = proofUrl;
+        if (pin is not null) DeliveryPin = pin;
         if (newStatus == DeliveryStatus.Delivered) ActualDeliveryTime = DateTime.UtcNow;
     }
 }

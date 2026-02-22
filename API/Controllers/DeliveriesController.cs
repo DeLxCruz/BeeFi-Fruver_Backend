@@ -106,7 +106,10 @@ public class DeliveriesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateDelivery([FromBody] CreateDeliveryRequest request)
     {
-        var command = new CreateDeliveryCommand(request.OrderId, request.EstimatedDeliveryTime);
+        var command = new CreateDeliveryCommand(
+            request.OrderId,
+            Domain.Enums.DeliveryMode.BeeFiLogistics,
+            request.EstimatedDeliveryTime);
         var result = await _mediator.Send(command);
 
         return result.IsSuccess
